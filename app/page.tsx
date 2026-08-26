@@ -33,11 +33,35 @@ export default async function Home() {
         <BannerCarousel banners={data.banners} />
       </div>
 
-      <section className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-11">
+      <section className="mx-auto max-w-7xl px-4 pt-5 lg:px-8 lg:pt-7">
+        <div className="grid gap-2.5 sm:grid-cols-3">
+          <QuickBenefit
+            eyebrow="Envío"
+            title="Gratis por Zoom y Tealca"
+            text="Despacho nacional coordinado contigo."
+            icon="truck"
+          />
+          <QuickBenefit
+            eyebrow="Precios"
+            title="USD + monto en Bs."
+            text="El monto en Bs. se calcula con la tasa vigente."
+            icon="price"
+          />
+          <QuickBenefit
+            eyebrow="Compra"
+            title="Atención por WhatsApp"
+            text="Confirma producto, cantidad y método de pago."
+            icon="chat"
+          />
+        </div>
+      </section>
+
+      <section id="categorias" className="mx-auto max-w-7xl px-4 py-9 lg:px-8 lg:py-12">
         <div className="mb-5 flex items-end justify-between gap-4">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Explora LCDS</p>
-            <h2 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">Compra por categoría</h2>
+            <h2 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">Encuentra lo que necesitas</h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-500">Una navegación simple, deportiva y pensada para llegar rápido al producto correcto.</p>
           </div>
           <Link href="#productos" className="hidden text-xs font-black text-neutral-500 transition hover:text-neutral-950 sm:block">Ver catálogo →</Link>
         </div>
@@ -47,12 +71,16 @@ export default async function Home() {
             <Link
               key={category.name}
               href="#productos"
-              className="group relative min-h-32 overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-50 p-4 transition duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:bg-white hover:shadow-[0_16px_40px_rgba(0,0,0,0.07)]"
+              className="group relative min-h-36 overflow-hidden rounded-[22px] border border-neutral-200 bg-neutral-50 p-4 transition duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:bg-white hover:shadow-[0_18px_45px_rgba(0,0,0,0.07)]"
             >
-              <span className="absolute right-3 top-2 text-4xl font-black text-neutral-100 transition group-hover:text-emerald-50">{category.code}</span>
-              <p className="relative text-[9px] font-black uppercase tracking-[0.15em] text-emerald-700">{category.eyebrow}</p>
-              <h3 className="relative mt-8 text-base font-black sm:text-lg">{category.name}</h3>
-              <span className="relative mt-2 inline-block text-xs font-bold text-neutral-400 transition group-hover:translate-x-1 group-hover:text-neutral-700">Explorar →</span>
+              <span className="absolute right-3 top-1 text-[44px] font-black tracking-[-0.08em] text-neutral-100 transition duration-300 group-hover:-translate-y-1 group-hover:text-emerald-50">{category.code}</span>
+              <div className="relative flex h-full flex-col justify-between">
+                <p className="text-[9px] font-black uppercase tracking-[0.15em] text-emerald-700">{category.eyebrow}</p>
+                <div className="pt-10">
+                  <h3 className="text-base font-black sm:text-lg">{category.name}</h3>
+                  <span className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-neutral-400 transition group-hover:translate-x-1 group-hover:text-neutral-700">Explorar <span>→</span></span>
+                </div>
+              </div>
             </Link>
           ))}
         </div>
@@ -60,14 +88,17 @@ export default async function Home() {
 
       <section id="productos" className="border-y border-neutral-100 bg-neutral-50/70">
         <div className="mx-auto max-w-7xl px-4 py-10 lg:px-8 lg:py-14">
-          <div className="mb-6 flex items-end justify-between gap-4">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Selección LCDS</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Catálogo LCDS</p>
               <h2 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">Productos destacados</h2>
-              <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-500">Precios claros en USD y su monto correspondiente en bolívares según la tasa vigente.</p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
+                Cada producto muestra su precio en USD y el monto final en Bs. calculado automáticamente con la tasa vigente configurada por LCDS Sports.
+              </p>
             </div>
-            <div className="hidden rounded-full border border-neutral-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-neutral-500 sm:block">
-              {data.products.length} productos
+            <div className="flex items-center gap-2">
+              <span className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-neutral-500">{data.products.length} productos</span>
+              <span className="hidden rounded-full bg-emerald-100 px-4 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-800 sm:inline-flex">Stock visible</span>
             </div>
           </div>
 
@@ -76,65 +107,91 @@ export default async function Home() {
               <ProductCard key={product.id} product={product} rateBcv={data.rateBcv} />
             ))}
           </div>
+
+          <div className="mt-7 flex justify-center">
+            <a
+              href={`https://wa.me/${data.settings.whatsappPhone}?text=${encodeURIComponent("Hola, LCDS Sports. Quiero ayuda para elegir un producto del catálogo.")}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-12 items-center justify-center rounded-full border border-neutral-300 bg-white px-6 text-sm font-black transition duration-300 hover:-translate-y-0.5 hover:border-neutral-950 hover:bg-neutral-950 hover:text-white"
+            >
+              ¿Necesitas ayuda para elegir? →
+            </a>
+          </div>
         </div>
       </section>
 
-      <section id="mayor" className="mx-auto max-w-7xl px-4 py-10 lg:px-8 lg:py-14">
-        <div className="relative overflow-hidden rounded-[30px] bg-neutral-950 p-6 text-white sm:p-9 lg:p-12">
-          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full border-[42px] border-emerald-500/10" />
-          <div className="absolute bottom-0 right-1/4 h-28 w-28 rounded-full bg-emerald-500/10 blur-2xl" />
+      <section id="envios" className="mx-auto max-w-7xl px-4 py-10 lg:px-8 lg:py-14">
+        <div className="relative overflow-hidden rounded-[32px] bg-emerald-500 p-6 sm:p-9 lg:p-12">
+          <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full border-[46px] border-neutral-950/5" />
+          <div className="absolute bottom-0 right-1/3 h-28 w-28 rounded-full bg-white/20 blur-3xl" />
 
-          <div className="relative grid gap-8 lg:grid-cols-[1fr_0.8fr] lg:items-center">
+          <div className="relative grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">Ventas al mayor</p>
+              <div className="inline-flex items-center gap-2 rounded-full bg-neutral-950 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                Beneficio LCDS
+              </div>
+              <h2 className="mt-5 max-w-2xl text-4xl font-black leading-[0.95] tracking-[-0.045em] text-neutral-950 sm:text-5xl">
+                Envío <span className="text-white">GRATIS</span> por Zoom y Tealca.
+              </h2>
+              <p className="mt-4 max-w-xl text-sm leading-6 text-emerald-950/80 sm:text-base">
+                Compra desde cualquier parte de Venezuela y coordinamos tu despacho de forma directa. Sin convertir el envío en una complicación.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <ShippingCard name="ZOOM" text="Cobertura nacional y coordinación por WhatsApp." />
+              <ShippingCard name="TEALCA" text="Otra opción gratuita para recibir tu pedido." />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-4 lg:px-8 lg:pb-6">
+        <div className="relative overflow-hidden rounded-[32px] bg-neutral-950 p-6 text-white sm:p-9 lg:p-12">
+          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full border-[42px] border-emerald-500/10" />
+          <div className="relative grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-center">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">LCDS Mayoristas</p>
               <h2 className="mt-2 max-w-2xl text-3xl font-black leading-[1.03] tracking-tight sm:text-4xl">{data.settings.wholesaleTitle}</h2>
               <p className="mt-4 max-w-xl text-sm leading-6 text-neutral-400 sm:text-base">{data.settings.wholesaleText}</p>
-              <a
-                href={`https://wa.me/${data.settings.whatsappPhone}?text=${encodeURIComponent("Hola, LCDS Sports. Quiero información sobre precios al mayor.")}`}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-6 inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-500 px-5 text-sm font-black text-neutral-950 transition hover:-translate-y-0.5 hover:bg-emerald-400"
-              >
-                CONSULTAR AL MAYOR
-              </a>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href="/mayoristas" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-500 px-5 text-sm font-black text-neutral-950 transition hover:-translate-y-0.5 hover:bg-emerald-400">
+                  VER PÁGINA MAYORISTA
+                </Link>
+                <a
+                  href={`https://wa.me/${data.settings.whatsappPhone}?text=${encodeURIComponent("Hola, LCDS Sports. Quiero información sobre compras al mayor.")}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/15 px-5 text-sm font-black transition hover:bg-white hover:text-neutral-950"
+                >
+                  HABLAR CON VENTAS
+                </a>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <WholesalePoint number="01" title="Equipos" text="Compra para entrenamiento o competencia." />
-              <WholesalePoint number="02" title="Academias" text="Condiciones para formación y práctica." />
-              <WholesalePoint number="03" title="Comercios" text="Precios pensados para reventa." />
-              <WholesalePoint number="04" title="Cantidad" text="Mejor precio según volumen." />
+              <WholesalePoint number="02" title="Academias" text="Condiciones pensadas para formación." />
+              <WholesalePoint number="03" title="Comercios" text="Precios especiales para reventa." />
+              <WholesalePoint number="04" title="Volumen" text="Mejor precio según cantidad." />
             </div>
           </div>
         </div>
       </section>
 
-      <section id="confianza" className="mx-auto max-w-7xl px-4 pb-12 lg:px-8 lg:pb-16">
-        <div className="grid overflow-hidden rounded-[30px] border border-neutral-200 lg:grid-cols-[1fr_1fr]">
-          <div className="p-6 sm:p-8 lg:p-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Compra con confianza</p>
-            <h2 className="mt-2 text-3xl font-black tracking-tight">Pagos y envíos claros</h2>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-neutral-500">{data.settings.shippingText}. Antes de cerrar tu compra coordinamos disponibilidad, pago y despacho directamente contigo.</p>
+      <section className="mx-auto max-w-7xl px-4 py-10 lg:px-8 lg:py-14">
+        <div className="mb-6 max-w-2xl">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Comprar debe sentirse fácil</p>
+          <h2 className="mt-2 text-3xl font-black tracking-tight">Menos ruido. Más claridad.</h2>
+          <p className="mt-3 text-sm leading-6 text-neutral-500">Los métodos de pago, cantidades y datos importantes aparecen donde realmente los necesitas: dentro de cada producto y al momento de preparar el pedido.</p>
+        </div>
 
-            <div className="mt-7 grid gap-3 sm:grid-cols-2">
-              <TrustItem title="Precio en USD" text="Zelle, USDT, divisas y depósito bancario." />
-              <TrustItem title="Pago en Bs." text="Calculado automáticamente con la tasa vigente." />
-              <TrustItem title="Atención humana" text="Tu pedido se coordina directamente por WhatsApp." />
-              <TrustItem title="Portuguesa" text="Operación local con envíos a toda Venezuela." />
-            </div>
-          </div>
-
-          <div className="bg-neutral-950 p-6 text-white sm:p-8 lg:p-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">Métodos disponibles</p>
-            <div className="mt-5 grid gap-2 sm:grid-cols-2">
-              {data.paymentMethods.map((method) => (
-                <div key={method.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-sm font-black">{method.name}</p>
-                  {method.detail && <p className="mt-1 text-xs leading-5 text-neutral-400">{method.detail}</p>}
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          <ProcessStep number="01" title="Elige tu producto" text="Revisa fotos, reputación, precio, stock y detalles." />
+          <ProcessStep number="02" title="Define cantidad y pago" text="En la ficha seleccionas cómo quieres completar tu compra." />
+          <ProcessStep number="03" title="Confirma por WhatsApp" text="Recibimos tu pedido organizado y coordinamos el despacho." />
         </div>
       </section>
 
@@ -143,9 +200,38 @@ export default async function Home() {
   );
 }
 
+function QuickBenefit({ eyebrow, title, text, icon }: { eyebrow: string; title: string; text: string; icon: "truck" | "price" | "chat" }) {
+  return (
+    <div className="group flex items-center gap-4 rounded-[20px] border border-neutral-200 bg-white p-4 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_35px_rgba(0,0,0,0.06)]">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-950 text-emerald-400 transition group-hover:bg-emerald-500 group-hover:text-neutral-950">
+        {icon === "truck" && <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.8"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>}
+        {icon === "price" && <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.7-.5-1.6-.8-2.7-.8-1.7 0-2.8.8-2.8 2 0 3.1 5.8 1.4 5.8 4.6 0 1.2-1.1 2-2.9 2-1.2 0-2.3-.3-3.2-.9M12 5.8v12.4"/></svg>}
+        {icon === "chat" && <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.8"><path d="M5 5h14v11H9l-4 3z"/><path d="M8 9h8M8 12h5"/></svg>}
+      </div>
+      <div>
+        <p className="text-[9px] font-black uppercase tracking-[0.16em] text-emerald-700">{eyebrow}</p>
+        <p className="mt-1 text-sm font-black">{title}</p>
+        <p className="mt-1 text-[11px] leading-5 text-neutral-500">{text}</p>
+      </div>
+    </div>
+  );
+}
+
+function ShippingCard({ name, text }: { name: string; text: string }) {
+  return (
+    <div className="rounded-[22px] border border-emerald-950/10 bg-white/85 p-5 backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:bg-white">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-xl font-black tracking-[-0.03em] text-neutral-950">{name}</span>
+        <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[9px] font-black uppercase text-emerald-800">Gratis</span>
+      </div>
+      <p className="mt-4 text-xs leading-5 text-neutral-600">{text}</p>
+    </div>
+  );
+}
+
 function WholesalePoint({ number, title, text }: { number: string; title: string; text: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:bg-white/[0.07]">
       <span className="text-[10px] font-black text-emerald-400">{number}</span>
       <p className="mt-4 text-sm font-black">{title}</p>
       <p className="mt-1 text-xs leading-5 text-neutral-500">{text}</p>
@@ -153,12 +239,14 @@ function WholesalePoint({ number, title, text }: { number: string; title: string
   );
 }
 
-function TrustItem({ title, text }: { title: string; text: string }) {
+function ProcessStep({ number, title, text }: { number: string; title: string; text: string }) {
   return (
-    <div className="rounded-2xl bg-neutral-50 p-4">
-      <div className="mb-3 h-1 w-8 rounded-full bg-emerald-500" />
-      <p className="text-sm font-black">{title}</p>
-      <p className="mt-1 text-xs leading-5 text-neutral-500">{text}</p>
+    <div className="group relative overflow-hidden rounded-[24px] border border-neutral-200 bg-neutral-50 p-5 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-[0_18px_45px_rgba(0,0,0,0.06)]">
+      <span className="absolute right-4 top-2 text-5xl font-black tracking-[-0.08em] text-neutral-100 transition group-hover:text-emerald-50">{number}</span>
+      <div className="relative pt-10">
+        <h3 className="text-lg font-black">{title}</h3>
+        <p className="mt-2 text-sm leading-6 text-neutral-500">{text}</p>
+      </div>
     </div>
   );
 }
