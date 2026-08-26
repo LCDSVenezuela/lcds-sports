@@ -91,11 +91,11 @@ export async function ensureCatalogSchema() {
     create table if not exists store_settings (
       id integer primary key,
       announcement_enabled boolean not null default true,
-      announcement_text text not null default 'Envíos a toda Venezuela',
+      announcement_text text not null default 'Envío GRATIS por Zoom y Tealca · Atención directa por WhatsApp',
       announcement_link text,
       whatsapp_phone text not null default '584225329551',
       location_text text not null default 'Portuguesa, Venezuela',
-      shipping_text text not null default 'Envíos a toda Venezuela por MRW, Zoom y Tealca',
+      shipping_text text not null default 'Envío gratis por Zoom y Tealca a toda Venezuela',
       wholesale_title text not null default 'Precios especiales para equipos, academias y comercios',
       wholesale_text text not null default 'Consulta condiciones por cantidad y recibe atención personalizada.',
       updated_at timestamptz not null default now()
@@ -132,6 +132,23 @@ export async function ensureCatalogSchema() {
     insert into store_settings (id)
     values (1)
     on conflict (id) do nothing
+  `;
+
+  await sql`
+    update store_settings
+    set
+      announcement_text = case
+        when announcement_text in ('Envíos a toda Venezuela', 'Envíos a toda Venezuela · Atención directa por WhatsApp')
+          then 'Envío GRATIS por Zoom y Tealca · Atención directa por WhatsApp'
+        else announcement_text
+      end,
+      shipping_text = case
+        when shipping_text in ('Envíos a toda Venezuela', 'Envíos a toda Venezuela por MRW, Zoom y Tealca')
+          then 'Envío gratis por Zoom y Tealca a toda Venezuela'
+        else shipping_text
+      end,
+      updated_at = now()
+    where id = 1
   `;
 
   await sql`
