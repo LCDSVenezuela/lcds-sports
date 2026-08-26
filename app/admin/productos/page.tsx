@@ -1,4 +1,6 @@
 import Link from "next/link";
+import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
+import { requireAdminPage } from "@/lib/admin-auth";
 import { getCatalogSnapshot } from "@/lib/catalog";
 import { fallbackCatalog } from "@/lib/fallback";
 import { calculateBcvBs, formatBs, formatUsd } from "@/lib/pricing";
@@ -6,6 +8,7 @@ import { calculateBcvBs, formatBs, formatUsd } from "@/lib/pricing";
 export const dynamic = "force-dynamic";
 
 export default async function ProductsAdminPage() {
+  await requireAdminPage();
   let snapshot = fallbackCatalog;
   let databaseOnline = false;
 
@@ -27,6 +30,7 @@ export default async function ProductsAdminPage() {
           <div className="flex flex-wrap gap-2">
             <Link href="/admin" className="flex min-h-11 items-center rounded-xl border border-white/15 px-4 text-xs font-black">PANEL</Link>
             <Link href="/admin/productos/nuevo" className="flex min-h-11 items-center rounded-xl bg-emerald-500 px-4 text-xs font-black text-neutral-950">+ NUEVO PRODUCTO</Link>
+            <AdminLogoutButton />
           </div>
         </div>
       </header>
