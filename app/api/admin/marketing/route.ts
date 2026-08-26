@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdminApi } from "@/lib/admin-auth";
 import { saveBanners, updateStoreSettings } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
-  const configuredKey = process.env.ADMIN_API_KEY;
-  const providedKey = request.headers.get("x-admin-key");
-
-  if (!configuredKey) {
-    return NextResponse.json({ ok: false, error: "ADMIN_API_KEY no está configurada" }, { status: 503 });
-  }
-
-  if (!providedKey || providedKey !== configuredKey) {
-    return NextResponse.json({ ok: false, error: "Clave administrativa inválida" }, { status: 401 });
+  if (!(await requireAdminApi())) {
+    return NextResponse.json({ ok: false, error: "Sesión administrativa requerida" }, { status: 401 });
   }
 
   const body = await request.json().catch(() => null);
@@ -34,7 +28,7 @@ export async function POST(request: NextRequest) {
       announcementLink: settings.announcementLink ? String(settings.announcementLink) : null,
       whatsappPhone: String(settings.whatsappPhone),
       locationText: String(settings.locationText || "Portuguesa, Venezuela"),
-      shippingText: String(settings.shippingText || "Envíos a toda Venezuela"),
+      shippingText: String(settings.shippingText || "Envío gratis por Zoom y Tealca a toda Venezuela"),
       wholesaleTitle: String(settings.wholesaleTitle || "Ventas al mayor"),
       wholesaleText: String(settings.wholesaleText || "Consulta condiciones por cantidad."),
     });
