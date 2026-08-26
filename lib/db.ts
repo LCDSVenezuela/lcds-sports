@@ -129,6 +129,30 @@ export async function ensureCatalogSchema() {
   `;
 
   await sql`
+    create table if not exists admin_users (
+      id bigserial primary key,
+      email text not null unique,
+      password_hash text not null,
+      password_salt text not null,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    )
+  `;
+
+  await sql`
+    create table if not exists admin_sessions (
+      id text primary key,
+      user_id bigint not null references admin_users(id) on delete cascade,
+      token_hash text not null unique,
+      expires_at timestamptz not null,
+      created_at timestamptz not null default now()
+    )
+  `;
+
+  await sql`create index if not exists admin_sessions_user_id_idx on admin_sessions(user_id)`;
+  await sql`create index if not exists admin_sessions_expires_at_idx on admin_sessions(expires_at)`;
+
+  await sql`
     insert into store_settings (id)
     values (1)
     on conflict (id) do nothing
