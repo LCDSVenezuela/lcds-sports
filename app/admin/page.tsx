@@ -1,4 +1,6 @@
 import Link from "next/link";
+import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
+import { requireAdminPage } from "@/lib/admin-auth";
 import { getCatalogSnapshot } from "@/lib/catalog";
 import { fallbackCatalog } from "@/lib/fallback";
 import MarketingForm from "./MarketingForm";
@@ -7,6 +9,7 @@ import RateForm from "./RateForm";
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
+  const session = await requireAdminPage();
   let snapshot = fallbackCatalog;
   let databaseOnline = false;
 
@@ -24,10 +27,12 @@ export default async function AdminPage() {
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">LCDS Sports</p>
             <h1 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">Centro de administración</h1>
+            <p className="mt-1 text-xs text-neutral-400">Sesión: {session.email}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/admin/productos" className="flex min-h-11 items-center rounded-xl border border-white/15 px-4 text-xs font-black transition hover:bg-white/10">PRODUCTOS</Link>
             <Link href="/" className="flex min-h-11 items-center rounded-xl bg-emerald-500 px-4 text-xs font-black text-neutral-950">VER TIENDA</Link>
+            <AdminLogoutButton />
           </div>
         </div>
       </header>
@@ -45,9 +50,7 @@ export default async function AdminPage() {
             <section className="rounded-3xl bg-white p-5 sm:p-7">
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Configuración comercial</p>
               <h2 className="mt-1 text-2xl font-black">Tasa BCV</h2>
-              <p className="mt-2 text-sm leading-6 text-neutral-500">
-                El precio principal en USD no cambia. La referencia BCV interna de cada producto se multiplica por esta tasa para mostrar únicamente el monto final en bolívares.
-              </p>
+              <p className="mt-2 text-sm leading-6 text-neutral-500">El precio principal en USD no cambia. La referencia BCV interna de cada producto se multiplica por esta tasa para mostrar únicamente el monto final en bolívares.</p>
               <RateForm initialRate={snapshot.rateBcv} />
             </section>
 
