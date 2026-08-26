@@ -1,68 +1,81 @@
 import Link from "next/link";
 import { getCatalogSnapshot } from "@/lib/catalog";
+import { fallbackCatalog } from "@/lib/fallback";
+import MarketingForm from "./MarketingForm";
 import RateForm from "./RateForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  let rate = 250;
-  let products = 0;
+  let snapshot = fallbackCatalog;
   let databaseOnline = false;
 
   try {
-    const snapshot = await getCatalogSnapshot();
-    rate = snapshot.rateBcv;
-    products = snapshot.products.length;
+    snapshot = await getCatalogSnapshot();
     databaseOnline = true;
   } catch {
     databaseOnline = false;
   }
 
   return (
-    <main className="min-h-screen bg-neutral-100 px-4 py-6 text-neutral-950 sm:px-6">
-      <div className="mx-auto max-w-4xl">
-        <div className="flex items-center justify-between gap-4">
+    <main className="min-h-screen bg-neutral-100 text-neutral-950">
+      <header className="border-b border-neutral-200 bg-neutral-950 text-white">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-5 sm:px-6 lg:px-8">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-green-700">LCDS Sports</p>
-            <h1 className="mt-1 text-3xl font-black tracking-tight">Panel administrativo</h1>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">LCDS Sports</p>
+            <h1 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">Centro de administración</h1>
           </div>
-          <Link href="/" className="rounded-xl border border-neutral-300 bg-white px-4 py-3 text-xs font-black">VER TIENDA</Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/productos" className="flex min-h-11 items-center rounded-xl border border-white/15 px-4 text-xs font-black transition hover:bg-white/10">PRODUCTOS</Link>
+            <Link href="/" className="flex min-h-11 items-center rounded-xl bg-emerald-500 px-4 text-xs font-black text-neutral-950">VER TIENDA</Link>
+          </div>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Stat label="Base de datos" value={databaseOnline ? "Conectada" : "Fallback activo"} accent={databaseOnline} />
+          <Stat label="Productos activos" value={String(snapshot.products.length)} />
+          <Stat label="Banners activos" value={String(snapshot.banners.length)} />
+          <Stat label="Tasa BCV" value={`Bs. ${snapshot.rateBcv.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`} />
         </div>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          <Stat label="Base de datos" value={databaseOnline ? "Conectada" : "Pendiente"} />
-          <Stat label="Productos activos" value={String(products)} />
-          <Stat label="Tasa BCV" value={`Bs. ${rate.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`} />
-        </div>
+        <div className="mt-6 grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
+          <div className="space-y-6">
+            <section className="rounded-3xl bg-white p-5 sm:p-7">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Configuración comercial</p>
+              <h2 className="mt-1 text-2xl font-black">Tasa BCV</h2>
+              <p className="mt-2 text-sm leading-6 text-neutral-500">
+                El precio principal en USD no cambia. La referencia BCV interna de cada producto se multiplica por esta tasa para mostrar únicamente el monto final en bolívares.
+              </p>
+              <RateForm initialRate={snapshot.rateBcv} />
+            </section>
 
-        <section className="mt-6 rounded-3xl bg-white p-5 sm:p-7">
-          <div className="max-w-xl">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-green-700">Configuración comercial</p>
-            <h2 className="mt-1 text-2xl font-black">Actualizar tasa BCV</h2>
-            <p className="mt-2 text-sm leading-6 text-neutral-500">
-              El precio principal en dólares no cambia. Al actualizar esta tasa, todos los montos visibles en bolívares se recalculan automáticamente usando la referencia BCV interna de cada producto.
-            </p>
-            <RateForm initialRate={rate} />
+            <Link href="/admin/productos" className="group block rounded-3xl bg-emerald-500 p-6 transition hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(16,185,129,0.22)] sm:p-7">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-950/70">Catálogo</p>
+              <h2 className="mt-2 text-2xl font-black text-neutral-950">Productos, imágenes y precios</h2>
+              <p className="mt-2 text-sm leading-6 text-emerald-950/80">Gestiona título, descripción, galería, USD, referencia BCV, stock, reputación, etiquetas y precios al mayor.</p>
+              <span className="mt-5 inline-block text-sm font-black text-neutral-950 transition group-hover:translate-x-1">Gestionar productos →</span>
+            </Link>
           </div>
-        </section>
 
-        <section className="mt-4 rounded-3xl border border-dashed border-neutral-300 bg-white p-5 sm:p-7">
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-neutral-400">Siguiente módulo</p>
-          <h2 className="mt-1 text-xl font-black">Productos y variantes</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
-            Aquí se incorporarán edición de precio en divisas, referencia BCV interna, stock, presentaciones, mayoristas, imágenes, estado y visibilidad.
-          </p>
-        </section>
+          <div>
+            <MarketingForm settings={snapshot.settings} banners={snapshot.banners} />
+          </div>
+        </div>
       </div>
     </main>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="rounded-2xl bg-white p-4">
-      <p className="text-[10px] font-black uppercase tracking-[0.14em] text-neutral-400">{label}</p>
-      <p className="mt-2 text-lg font-black">{value}</p>
+    <div className="rounded-2xl bg-white p-4 sm:p-5">
+      <div className="flex items-center gap-2">
+        {accent && <span className="h-2 w-2 rounded-full bg-emerald-500" />}
+        <p className="text-[10px] font-black uppercase tracking-[0.14em] text-neutral-400">{label}</p>
+      </div>
+      <p className="mt-2 text-lg font-black sm:text-xl">{value}</p>
     </div>
   );
 }
