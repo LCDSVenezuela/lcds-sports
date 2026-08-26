@@ -53,6 +53,87 @@ export async function ensureCatalogSchema() {
     )
   `;
 
+  await sql`alter table products add column if not exists sku text`;
+  await sql`alter table products add column if not exists category text not null default 'Softball'`;
+  await sql`alter table products add column if not exists description text`;
+  await sql`alter table products add column if not exists rating_e2 integer not null default 500`;
+  await sql`alter table products add column if not exists review_count integer not null default 0`;
+  await sql`alter table products add column if not exists labels text not null default ''`;
+  await sql`alter table products add column if not exists free_shipping boolean not null default true`;
+  await sql`alter table products add column if not exists warranty_days integer not null default 1`;
+  await sql`alter table products add column if not exists wholesale_enabled boolean not null default true`;
+  await sql`alter table products add column if not exists wholesale_note text`;
+
+  await sql`
+    create table if not exists product_images (
+      id bigserial primary key,
+      product_id bigint not null references products(id) on delete cascade,
+      image_url text not null,
+      alt_text text,
+      sort_order integer not null default 0,
+      created_at timestamptz not null default now()
+    )
+  `;
+
+  await sql`
+    create table if not exists wholesale_tiers (
+      id bigserial primary key,
+      product_id bigint not null references products(id) on delete cascade,
+      min_quantity integer not null,
+      price_usd_cents integer not null,
+      bcv_reference_usd_cents integer not null,
+      label text,
+      sort_order integer not null default 0
+    )
+  `;
+
+  await sql`
+    create table if not exists store_settings (
+      id integer primary key,
+      announcement_enabled boolean not null default true,
+      announcement_text text not null default 'Envíos a toda Venezuela',
+      announcement_link text,
+      whatsapp_phone text not null default '584225329551',
+      location_text text not null default 'Portuguesa, Venezuela',
+      shipping_text text not null default 'Envíos a toda Venezuela por MRW, Zoom y Tealca',
+      wholesale_title text not null default 'Precios especiales para equipos, academias y comercios',
+      wholesale_text text not null default 'Consulta condiciones por cantidad y recibe atención personalizada.',
+      updated_at timestamptz not null default now()
+    )
+  `;
+
+  await sql`
+    create table if not exists banners (
+      id bigserial primary key,
+      title text,
+      subtitle text,
+      image_url text not null,
+      mobile_image_url text,
+      cta_text text,
+      cta_href text,
+      active boolean not null default true,
+      sort_order integer not null default 0,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    )
+  `;
+
+  await sql`
+    create table if not exists payment_methods (
+      id bigserial primary key,
+      name text not null unique,
+      detail text,
+      active boolean not null default true,
+      sort_order integer not null default 0
+    )
+  `;
+
+  await sql`
+    insert into store_settings (id)
+    values (1)
+    on conflict (id) do nothing
+  `;
+
   await sql`
     insert into exchange_rates (currency, rate_e4, source, active)
     select 'USD', 2500000, 'BCV', true
@@ -65,11 +146,13 @@ export async function ensureCatalogSchema() {
     insert into products (
       name, slug, brand, subtitle, image, badge,
       price_usd_cents, bcv_reference_usd_cents,
-      stock, active, featured, sort_order
+      stock, active, featured, sort_order,
+      sku, category, description, rating_e2, review_count, labels,
+      free_shipping, warranty_days, wholesale_enabled, wholesale_note
     )
     values
       (
-        'Pelota Softball SB-120I',
+        'Pelota Softball Tamanaco SB-120I',
         'pelota-softball-tamanaco-sb-120i',
         'Tamanaco',
         'Importada · Bolsa Chillona',
@@ -80,13 +163,23 @@ export async function ensureCatalogSchema() {
         50,
         true,
         true,
-        1
+        1,
+        'TAM-SB120I-1',
+        'Pelotas',
+        'Pelota de softball Tamanaco SB-120I importada. Diseñada para entrenamiento, juego y competencia, con excelente presencia y terminación.',
+        500,
+        2,
+        'TOP|IMPORTADA|SOFTBALL',
+        true,
+        1,
+        true,
+        'Consulta precios especiales por cantidad para equipos, academias, comercios y revendedores.'
       ),
       (
-        'Pack 3 SB-120I',
+        '3 Pelotas Softball Tamanaco SB-120I',
         'pack-3-tamanaco-sb-120i',
         'Tamanaco',
-        '3 unidades',
+        'Pack de 3 unidades · Bolsa Chillona',
         '/products/tamanaco-pack3.png',
         'Pack 3',
         3800,
@@ -94,8 +187,62 @@ export async function ensureCatalogSchema() {
         20,
         true,
         false,
-        2
+        2,
+        'TAM-SB120I-P3',
+        'Pelotas',
+        'Pack de 3 pelotas de softball Tamanaco SB-120I importadas, ideal para equipos, entrenamientos y reposición.',
+        500,
+        2,
+        'PACK|IMPORTADA|SOFTBALL',
+        true,
+        1,
+        true,
+        'Disponible con condiciones especiales al mayor.'
       )
     on conflict (slug) do nothing
+  `;
+
+  await sql`
+    insert into product_images (product_id, image_url, alt_text, sort_order)
+    select p.id, p.image, p.name, 0
+    from products p
+    where p.image is not null
+      and not exists (
+        select 1 from product_images pi where pi.product_id = p.id
+      )
+  `;
+
+  await sql`
+    insert into wholesale_tiers (product_id, min_quantity, price_usd_cents, bcv_reference_usd_cents, label, sort_order)
+    select p.id, 6, 650, 900, 'Desde 6 unidades', 1
+    from products p
+    where p.slug = 'pelota-softball-tamanaco-sb-120i'
+      and not exists (select 1 from wholesale_tiers wt where wt.product_id = p.id)
+  `;
+
+  await sql`
+    insert into payment_methods (name, detail, sort_order)
+    values
+      ('Zelle', 'Precio en divisas', 1),
+      ('USDT', 'Precio en divisas', 2),
+      ('Divisas', 'Efectivo en USD', 3),
+      ('Depósito bancario', 'Precio en divisas', 4),
+      ('Pago móvil', 'Monto calculado en Bs. según tasa vigente', 5),
+      ('Transferencia Bs.', 'Monto calculado en Bs. según tasa vigente', 6)
+    on conflict (name) do nothing
+  `;
+
+  await sql`
+    insert into banners (title, subtitle, image_url, mobile_image_url, cta_text, cta_href, active, sort_order)
+    select
+      'La Casa del Softball',
+      'Pelotas, equipamiento y artículos deportivos con envíos a toda Venezuela.',
+      '/products/tamanaco-pack3.png',
+      '/products/tamanaco-pack3.png',
+      'Ver productos',
+      '#productos',
+      true,
+      1
+    where not exists (select 1 from banners)
   `;
 }
