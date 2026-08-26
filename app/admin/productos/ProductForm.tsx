@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import ImageUploader from "@/components/admin/ImageUploader";
 import type { CatalogProduct } from "@/lib/catalog";
 import { calculateBcvBs, formatBs } from "@/lib/pricing";
 
@@ -21,6 +23,7 @@ function slugify(value: string) {
 }
 
 export default function ProductForm({ product, rateBcv }: { product?: CatalogProduct; rateBcv: number }) {
+  const router = useRouter();
   const [name, setName] = useState(product?.name || "");
   const [slug, setSlug] = useState(product?.slug || "");
   const [sku, setSku] = useState(product?.sku || "");
@@ -53,7 +56,6 @@ export default function ProductForm({ product, rateBcv }: { product?: CatalogPro
         }))
       : [{ minQuantity: "6", priceUsd: "", bcvReferenceUsd: "", label: "Desde 6 unidades" }],
   );
-  const [adminKey, setAdminKey] = useState("");
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -61,6 +63,8 @@ export default function ProductForm({ product, rateBcv }: { product?: CatalogPro
     const ref = Number(bcvReferenceUsd);
     return Number.isFinite(ref) ? formatBs(calculateBcvBs(ref, rateBcv)) : "Bs. 0,00";
   }, [bcvReferenceUsd, rateBcv]);
+
+  const mediaFolder = `products/${slug || slugify(name) || "nuevo-producto"}`;
 
   function updateImage(index: number, value: string) {
     setImages((current) => current.map((item, itemIndex) => (itemIndex === index ? value : item)));
@@ -97,7 +101,7 @@ export default function ProductForm({ product, rateBcv }: { product?: CatalogPro
         warrantyDays: Number(warrantyDays),
         wholesaleEnabled,
         wholesaleNote,
-        images,
+        images: images.filter(Boolean),
         wholesaleTiers: tiers.map((tier) => ({
           minQuantity: Number(tier.minQuantity),
           priceUsd: Number(tier.priceUsd),
@@ -108,12 +112,24 @@ export default function ProductForm({ product, rateBcv }: { product?: CatalogPro
 
       const response = await fetch("/api/admin/products", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-key": adminKey },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       const data = await response.json();
+
+      if (response.status === 401) {
+        window.location.href = "/admin/login";
+        return;
+      }
       if (!response.ok) throw new Error(data?.error || "No se pudo guardar el producto");
-      setStatus(product ? "Producto actualizado correctamente." : "Producto creado correctamente. Ya puedes volver al listado.");
+
+      setStatus(product ? "Producto actualizado correctamente." : "Producto creado correctamente.");
+      if (!product && data?.id) {
+        router.push(`/admin/productos/${data.id}`);
+        router.refresh();
+      } else {
+        router.refresh();
+      }
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Ocurrió un error");
     } finally {
@@ -168,34 +184,37 @@ export default function ProductForm({ product, rateBcv }: { product?: CatalogPro
 
         <div className="mt-5 flex flex-wrap gap-3">
           <Toggle label="Producto destacado" checked={featured} onChange={setFeatured} />
-          <Toggle label="Envío nacional" checked={freeShipping} onChange={setFreeShipping} />
+          <Toggle label="Envío gratis Zoom/Tealca" checked={freeShipping} onChange={setFreeShipping} />
           <Toggle label="Venta al mayor" checked={wholesaleEnabled} onChange={setWholesaleEnabled} />
         </div>
       </section>
 
       <section className="rounded-3xl bg-white p-5 sm:p-7">
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Galería</p>
-        <h2 className="mt-1 text-2xl font-black">Imágenes del producto</h2>
-        <p className="mt-2 text-sm leading-6 text-neutral-500">La primera imagen será la portada. Puedes cargar hasta 10 URLs o rutas del proyecto.</p>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Galería</p>
+            <h2 className="mt-1 text-2xl font-black">Fotos del producto</h2>
+            <p className="mt-2 text-sm leading-6 text-neutral-500">La primera foto será la portada. Sube imágenes directamente desde tu teléfono o PC y ordénalas de izquierda a derecha.</p>
+          </div>
+          <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-[10px] font-black text-neutral-500">Hasta 8 fotos</span>
+        </div>
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {images.map((image, index) => (
-            <div key={index} className="grid gap-3 sm:grid-cols-[92px_1fr_auto] sm:items-center">
-              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl bg-neutral-50">
-                {image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={image} alt="" className="h-full w-full object-contain p-1" />
-                ) : (
-                  <span className="text-[9px] font-black uppercase text-neutral-300">Imagen</span>
+            <div key={index} className="rounded-[22px] border border-neutral-200 p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <p className="text-xs font-black">{index === 0 ? "Foto principal" : `Foto ${index + 1}`}</p>
+                {images.length > 1 && (
+                  <button type="button" onClick={() => setImages((current) => current.filter((_, itemIndex) => itemIndex !== index))} className="text-[10px] font-black text-red-600">QUITAR</button>
                 )}
               </div>
-              <input value={image} onChange={(event) => updateImage(index, event.target.value)} placeholder="/products/foto.jpg o https://..." className="min-h-12 min-w-0 rounded-xl border border-neutral-200 px-4 text-base outline-none focus:border-emerald-500" />
-              <button type="button" onClick={() => setImages((current) => current.filter((_, itemIndex) => itemIndex !== index))} className="min-h-11 rounded-xl border border-neutral-200 px-4 text-xs font-black text-red-600">QUITAR</button>
+              <ImageUploader label={index === 0 ? "Portada" : "Galería"} value={image} onChange={(value) => updateImage(index, value)} folder={mediaFolder} />
             </div>
           ))}
         </div>
-        {images.length < 10 && (
-          <button type="button" onClick={() => setImages((current) => [...current, ""])} className="mt-4 min-h-11 rounded-xl border border-neutral-300 px-4 text-xs font-black">+ AGREGAR FOTO</button>
+
+        {images.length < 8 && (
+          <button type="button" onClick={() => setImages((current) => [...current, ""])} className="mt-5 min-h-11 rounded-xl border border-neutral-300 px-4 text-xs font-black transition hover:border-neutral-950">+ AGREGAR OTRA FOTO</button>
         )}
       </section>
 
@@ -231,10 +250,10 @@ export default function ProductForm({ product, rateBcv }: { product?: CatalogPro
       </section>
 
       <section className="rounded-3xl bg-neutral-950 p-5 text-white sm:p-7">
-        <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.14em] text-neutral-400">Clave administrativa</label>
-            <input type="password" value={adminKey} onChange={(event) => setAdminKey(event.target.value)} className="min-h-12 w-full rounded-xl border border-white/10 bg-white/10 px-4 text-base outline-none focus:border-emerald-500 sm:max-w-md" placeholder="••••••••" />
+            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-400">Sesión protegida</p>
+            <p className="mt-1 text-sm text-neutral-300">Los cambios se guardan con tu sesión de administrador.</p>
           </div>
           <button type="submit" disabled={saving} className="min-h-12 rounded-xl bg-emerald-500 px-6 text-sm font-black text-neutral-950 disabled:opacity-50">
             {saving ? "GUARDANDO..." : product ? "ACTUALIZAR PRODUCTO" : "CREAR PRODUCTO"}
