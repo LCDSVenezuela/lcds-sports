@@ -70,22 +70,41 @@ export default async function ProductPage({
               {product.sku && <span className="text-xs font-semibold text-neutral-400">SKU {product.sku}</span>}
             </div>
 
-            <div className="mt-7 rounded-2xl border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
-              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-neutral-400">Precio en divisas</p>
-              <div className="mt-1 flex flex-wrap items-end gap-x-5 gap-y-2">
-                <p className="text-4xl font-black tracking-[-0.04em] sm:text-5xl">{formatUsd(product.priceUsd)}</p>
-                <div className="pb-1">
-                  <p className="text-[9px] font-black uppercase tracking-[0.14em] text-neutral-400">Pago en Bs.</p>
-                  <p className="text-lg font-black text-neutral-700">{formatBs(bsPrice)}</p>
-                </div>
+            <div className="mt-7 overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-[0_18px_45px_rgba(0,0,0,0.045)]">
+              <div className="p-5 sm:p-6">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-neutral-400">Precio en USD</p>
+                <p className="mt-1 text-4xl font-black tracking-[-0.04em] sm:text-5xl">{formatUsd(product.priceUsd)}</p>
               </div>
-              <p className="mt-3 text-xs leading-5 text-neutral-500">El monto en bolívares se actualiza automáticamente según la tasa vigente configurada por LCDS Sports.</p>
+              <div className="border-t border-neutral-100 bg-neutral-50 px-5 py-4 sm:px-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-[0.14em] text-neutral-400">Precio en Bs.</p>
+                    <p className="mt-1 text-xl font-black text-neutral-800">{formatBs(bsPrice)}</p>
+                  </div>
+                  <span className="rounded-full bg-white px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.12em] text-neutral-500 shadow-sm">Tasa vigente</span>
+                </div>
+                <p className="mt-3 max-w-lg text-[11px] leading-5 text-neutral-500">
+                  El monto en Bs. se calcula automáticamente con la referencia interna configurada para este producto y la tasa vigente de LCDS Sports.
+                </p>
+              </div>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <InfoPill label="Disponibilidad" value={product.stock > 0 ? `${product.stock} disponibles` : "Agotado"} positive={product.stock > 0} />
-              <InfoPill label="Envío" value={product.freeShipping ? "Disponible nacional" : "Consultar"} positive={product.freeShipping} />
+              <InfoPill label="Envío" value={product.freeShipping ? "Gratis por Zoom y Tealca" : "Consultar condiciones"} positive={product.freeShipping} />
             </div>
+
+            {product.freeShipping && (
+              <div className="mt-4 flex items-center gap-4 rounded-[20px] bg-emerald-500 p-4 text-neutral-950">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-950 text-emerald-400">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.8"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+                </div>
+                <div>
+                  <p className="text-sm font-black">Envío gratis nacional</p>
+                  <p className="mt-1 text-xs leading-5 text-emerald-950/75">Puedes coordinar tu despacho por Zoom o Tealca al confirmar el pedido.</p>
+                </div>
+              </div>
+            )}
 
             <div className="mt-6 border-t border-neutral-200 pt-6">
               <WhatsAppOrderButton
@@ -99,11 +118,29 @@ export default async function ProductPage({
                 stock={product.stock}
               />
             </div>
+
+            <div className="mt-6 rounded-[22px] border border-neutral-200 p-4 sm:p-5">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">Métodos de pago</p>
+                  <p className="mt-1 text-sm font-black">Elige el que te resulte más cómodo</p>
+                </div>
+                <span className="text-[10px] font-bold text-neutral-400">Al confirmar</span>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {snapshot.paymentMethods.map((method) => (
+                  <span key={method.id} className="inline-flex min-h-9 items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 text-[11px] font-black text-neutral-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    {method.name}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
-        <section className="mt-12 grid gap-5 lg:grid-cols-[1.4fr_0.6fr]">
-          <div className="rounded-3xl border border-neutral-200 p-6 sm:p-8">
+        <section className="mt-12 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
+          <div className="rounded-[28px] border border-neutral-200 p-6 sm:p-8">
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Información del producto</p>
             <h2 className="mt-2 text-2xl font-black">Descripción y detalles</h2>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-600 sm:text-base">{product.description || product.subtitle || "Consulta con nuestro equipo para más información."}</p>
@@ -116,28 +153,27 @@ export default async function ProductPage({
             </div>
           </div>
 
-          <div id="confianza" className="rounded-3xl bg-neutral-950 p-6 text-white sm:p-8">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400">Compra con confianza</p>
-            <h2 className="mt-2 text-2xl font-black">Pagos y entrega</h2>
-            <div className="mt-5 space-y-3">
-              {snapshot.paymentMethods.map((method) => (
-                <div key={method.id} className="rounded-xl border border-white/10 bg-white/5 p-3">
-                  <p className="text-sm font-black">{method.name}</p>
-                  {method.detail && <p className="mt-1 text-xs leading-5 text-neutral-400">{method.detail}</p>}
-                </div>
-              ))}
+          <div className="rounded-[28px] bg-neutral-950 p-6 text-white sm:p-8">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400">Compra tranquila</p>
+            <h2 className="mt-2 text-2xl font-black">Todo claro antes de pagar</h2>
+            <div className="mt-6 space-y-4">
+              <ConfidenceItem title="Stock visible" text={product.stock > 0 ? "Producto disponible para coordinar pedido." : "Actualmente agotado."} />
+              <ConfidenceItem title="Precio definido" text="Ves el precio en USD y el monto calculado en Bs. antes de escribirnos." />
+              <ConfidenceItem title="Despacho coordinado" text={product.freeShipping ? "Envío gratis por Zoom y Tealca." : snapshot.settings.shippingText} />
             </div>
-            <p className="mt-5 text-xs leading-5 text-neutral-400">{snapshot.settings.shippingText}</p>
           </div>
         </section>
 
         {product.wholesaleEnabled && (
-          <section id="mayor" className="mt-6 overflow-hidden rounded-3xl bg-emerald-500 p-6 sm:p-8 lg:p-10">
+          <section id="mayor" className="mt-6 overflow-hidden rounded-[28px] bg-emerald-500 p-6 sm:p-8 lg:p-10">
             <div className="grid gap-7 lg:grid-cols-[1fr_1fr] lg:items-center">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-950/70">Ventas al mayor</p>
                 <h2 className="mt-2 max-w-xl text-3xl font-black leading-[1.02] tracking-tight text-neutral-950">{snapshot.settings.wholesaleTitle}</h2>
                 <p className="mt-3 max-w-xl text-sm leading-6 text-emerald-950/80">{product.wholesaleNote || snapshot.settings.wholesaleText}</p>
+                <Link href="/mayoristas" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-neutral-950 px-4 text-xs font-black text-white transition hover:-translate-y-0.5">
+                  VER PÁGINA MAYORISTA
+                </Link>
               </div>
 
               <div className="space-y-2">
@@ -182,7 +218,7 @@ export default async function ProductPage({
 
 function InfoPill({ label, value, positive }: { label: string; value: string; positive?: boolean }) {
   return (
-    <div className="rounded-2xl border border-neutral-200 p-4">
+    <div className="rounded-[20px] border border-neutral-200 p-4">
       <p className="text-[9px] font-black uppercase tracking-[0.14em] text-neutral-400">{label}</p>
       <p className={`mt-1 text-sm font-black ${positive ? "text-emerald-700" : "text-neutral-800"}`}>{value}</p>
     </div>
@@ -194,6 +230,18 @@ function DetailRow({ label, value }: { label: string; value: string }) {
     <div className="flex items-center justify-between gap-4 rounded-xl bg-neutral-50 px-4 py-3">
       <span className="text-xs font-semibold text-neutral-400">{label}</span>
       <span className="text-right text-sm font-black text-neutral-800">{value}</span>
+    </div>
+  );
+}
+
+function ConfidenceItem({ title, text }: { title: string; text: string }) {
+  return (
+    <div className="border-b border-white/10 pb-4 last:border-b-0 last:pb-0">
+      <div className="flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full bg-emerald-400" />
+        <p className="text-sm font-black">{title}</p>
+      </div>
+      <p className="mt-2 pl-4 text-xs leading-5 text-neutral-400">{text}</p>
     </div>
   );
 }
