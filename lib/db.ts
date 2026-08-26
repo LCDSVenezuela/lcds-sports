@@ -203,6 +203,34 @@ export async function ensureCatalogSchema() {
   `;
 
   await sql`
+    update products
+    set
+      name = 'Pelota Softball Tamanaco SB-120I',
+      sku = coalesce(sku, 'TAM-SB120I-1'),
+      category = 'Pelotas',
+      description = coalesce(description, 'Pelota de softball Tamanaco SB-120I importada. Diseñada para entrenamiento, juego y competencia, con excelente presencia y terminación.'),
+      labels = case when labels = '' then 'TOP|IMPORTADA|SOFTBALL' else labels end,
+      rating_e2 = case when rating_e2 = 0 then 500 else rating_e2 end,
+      review_count = case when review_count = 0 then 2 else review_count end,
+      wholesale_note = coalesce(wholesale_note, 'Consulta precios especiales por cantidad para equipos, academias, comercios y revendedores.')
+    where slug = 'pelota-softball-tamanaco-sb-120i'
+  `;
+
+  await sql`
+    update products
+    set
+      name = '3 Pelotas Softball Tamanaco SB-120I',
+      sku = coalesce(sku, 'TAM-SB120I-P3'),
+      category = 'Pelotas',
+      description = coalesce(description, 'Pack de 3 pelotas de softball Tamanaco SB-120I importadas, ideal para equipos, entrenamientos y reposición.'),
+      labels = case when labels = '' then 'PACK|IMPORTADA|SOFTBALL' else labels end,
+      rating_e2 = case when rating_e2 = 0 then 500 else rating_e2 end,
+      review_count = case when review_count = 0 then 2 else review_count end,
+      wholesale_note = coalesce(wholesale_note, 'Disponible con condiciones especiales al mayor.')
+    where slug = 'pack-3-tamanaco-sb-120i'
+  `;
+
+  await sql`
     insert into product_images (product_id, image_url, alt_text, sort_order)
     select p.id, p.image, p.name, 0
     from products p
