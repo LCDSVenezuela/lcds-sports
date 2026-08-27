@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LCDS Sports
 
-## Getting Started
+Catálogo deportivo mobile-first de La Casa del Softball, construido con Next.js, PostgreSQL y Vercel.
 
-First, run the development server:
+## Desarrollo
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Administración
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+La zona `/admin` usa autenticación propia con sesión segura almacenada en PostgreSQL. En la primera entrada, si todavía no existe un administrador, el sistema permite crear la cuenta inicial. Después, el acceso se realiza con correo y contraseña y las rutas administrativas quedan protegidas.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Imágenes y banners
 
-## Learn More
+Las imágenes de productos y banners se almacenan en **Vercel Blob**. El proyecto espera un Blob Store público conectado a los entornos de Preview y Production. El panel permite seleccionar archivos desde PC o teléfono, previsualizarlos y guardarlos sin trabajar manualmente con URLs.
 
-To learn more about Next.js, take a look at the following resources:
+Formatos admitidos: JPG, PNG, WEBP y AVIF. Límite por imagen: 8 MB.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Precios
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- El precio público principal se administra en USD.
+- Cada producto mantiene una referencia BCV interna que no se muestra al cliente.
+- El precio público en bolívares se calcula automáticamente usando la tasa vigente configurada desde el panel.
+- Las escalas mayoristas usan la misma lógica de USD + referencia interna para Bs.
 
-## Deploy on Vercel
+## Deploy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+GitHub alimenta los deployments de Preview y Production en Vercel. La base de datos PostgreSQL y Vercel Blob deben estar conectados al proyecto para habilitar todas las funciones administrativas.
