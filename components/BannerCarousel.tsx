@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import BrandCarousel from "@/components/BrandCarousel";
 import type { StoreBanner } from "@/lib/catalog";
 
 export default function BannerCarousel({ banners }: { banners: StoreBanner[] }) {
@@ -137,7 +136,6 @@ export default function BannerCarousel({ banners }: { banners: StoreBanner[] }) 
           </div>
         </div>
       </section>
-      <BrandCarousel />
     </>
   );
 }
