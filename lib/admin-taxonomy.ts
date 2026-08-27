@@ -10,10 +10,6 @@ export type TaxonomyItem = {
   sortOrder: number;
 };
 
-function tableName(kind: TaxonomyKind) {
-  return kind === "brand" ? "catalog_brands" : "catalog_categories";
-}
-
 function slugify(value: string) {
   return value
     .normalize("NFD")
@@ -56,7 +52,7 @@ async function ensureTaxonomySchema() {
     select distinct trim(brand), lower(regexp_replace(trim(brand), '[^a-zA-Z0-9]+', '-', 'g')), true, 0
     from products
     where trim(coalesce(brand, '')) <> ''
-    on conflict (name) do nothing
+    on conflict do nothing
   `;
 
   await sql`
@@ -64,7 +60,7 @@ async function ensureTaxonomySchema() {
     select distinct trim(category), lower(regexp_replace(trim(category), '[^a-zA-Z0-9]+', '-', 'g')), true, 0
     from products
     where trim(coalesce(category, '')) <> ''
-    on conflict (name) do nothing
+    on conflict do nothing
   `;
 }
 
@@ -100,7 +96,6 @@ export async function getTaxonomies(includeInactive = true) {
 export async function saveTaxonomyItem(kind: TaxonomyKind, input: { id?: number; name: string; slug?: string; active?: boolean }) {
   await ensureTaxonomySchema();
   const sql = db();
-  const table = tableName(kind);
   const name = input.name.trim();
   const slug = slugify(input.slug?.trim() || name);
 
