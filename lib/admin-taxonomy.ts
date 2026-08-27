@@ -98,53 +98,60 @@ export async function saveTaxonomyItem(kind: TaxonomyKind, input: { id?: number;
   const sql = db();
   const name = input.name.trim();
   const slug = slugify(input.slug?.trim() || name);
+  const active = input.active ?? true;
 
   if (!name) throw new Error("El nombre es obligatorio");
   if (!slug) throw new Error("No se pudo generar el identificador");
 
   if (kind === "brand") {
     if (input.id) {
+      const id = input.id;
       return sql.begin(async (tx) => {
-        const current = await tx`select name from catalog_brands where id = ${input.id} limit 1`;
+        const current = await tx`select name from catalog_brands where id = ${id} limit 1`;
         if (!current[0]) throw new Error("Marca no encontrada");
         const oldName = String(current[0].name);
         const rows = await tx`
           update catalog_brands
-          set name = ${name}, slug = ${slug}, active = ${input.active ?? true}, updated_at = now()
-          where id = ${input.id}
+          set name = ${name}, slug = ${slug}, active = ${active}, updated_at = now()
+          where id = ${id}
           returning id
         `;
-        if (oldName !== name) await tx`update products set brand = ${name}, updated_at = now() where brand = ${oldName}`;
+        if (oldName !== name) {
+          await tx`update products set brand = ${name}, updated_at = now() where brand = ${oldName}`;
+        }
         return Number(rows[0].id);
       });
     }
     const rows = await sql`
       insert into catalog_brands (name, slug, active, sort_order)
-      values (${name}, ${slug}, ${input.active ?? true}, coalesce((select max(sort_order) + 1 from catalog_brands), 1))
+      values (${name}, ${slug}, ${active}, coalesce((select max(sort_order) + 1 from catalog_brands), 1))
       returning id
     `;
     return Number(rows[0].id);
   }
 
   if (input.id) {
+    const id = input.id;
     return sql.begin(async (tx) => {
-      const current = await tx`select name from catalog_categories where id = ${input.id} limit 1`;
+      const current = await tx`select name from catalog_categories where id = ${id} limit 1`;
       if (!current[0]) throw new Error("Categoría no encontrada");
       const oldName = String(current[0].name);
       const rows = await tx`
         update catalog_categories
-        set name = ${name}, slug = ${slug}, active = ${input.active ?? true}, updated_at = now()
-        where id = ${input.id}
+        set name = ${name}, slug = ${slug}, active = ${active}, updated_at = now()
+        where id = ${id}
         returning id
       `;
-      if (oldName !== name) await tx`update products set category = ${name}, updated_at = now() where category = ${oldName}`;
+      if (oldName !== name) {
+        await tx`update products set category = ${name}, updated_at = now() where category = ${oldName}`;
+      }
       return Number(rows[0].id);
     });
   }
 
   const rows = await sql`
     insert into catalog_categories (name, slug, active, sort_order)
-    values (${name}, ${slug}, ${input.active ?? true}, coalesce((select max(sort_order) + 1 from catalog_categories), 1))
+    values (${name}, ${slug}, ${active}, coalesce((select max(sort_order) + 1 from catalog_categories), 1))
     returning id
   `;
   return Number(rows[0].id);
