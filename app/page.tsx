@@ -1,5 +1,6 @@
 import Link from "next/link";
 import BannerCarousel from "@/components/BannerCarousel";
+import BrandCarousel from "@/components/BrandCarousel";
 import ProductCard from "@/components/ProductCard";
 import StoreFooter from "@/components/StoreFooter";
 import StoreHeader from "@/components/StoreHeader";
@@ -31,6 +32,7 @@ export default async function Home() {
 
       <div className="mx-auto max-w-7xl px-4 pt-4 lg:px-8 lg:pt-6">
         <BannerCarousel banners={data.banners} />
+        <BrandCarousel />
       </div>
 
       <section id="categorias" className="mx-auto max-w-7xl px-4 py-9 lg:px-8 lg:py-12">
@@ -38,7 +40,6 @@ export default async function Home() {
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Explora LCDS</p>
             <h2 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">Encuentra lo que necesitas</h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-500">Una navegación simple, deportiva y pensada para llegar rápido al producto correcto.</p>
           </div>
           <Link href="#productos" className="hidden text-xs font-black text-neutral-500 transition hover:text-neutral-950 sm:block">Ver catálogo →</Link>
         </div>
@@ -69,9 +70,6 @@ export default async function Home() {
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Catálogo LCDS</p>
               <h2 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">Productos destacados</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
-                Cada producto muestra su precio en USD y el monto final en Bs. calculado automáticamente con la tasa vigente configurada por LCDS Sports.
-              </p>
             </div>
             <div className="flex items-center gap-2">
               <span className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-neutral-500">{data.products.length} productos</span>
@@ -102,7 +100,6 @@ export default async function Home() {
         <div className="mb-7 max-w-2xl">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">La experiencia LCDS</p>
           <h2 className="mt-1 text-3xl font-black uppercase tracking-[-0.035em] sm:text-4xl">¿Por qué comprar en LCDS?</h2>
-          <p className="mt-2 text-sm font-semibold text-neutral-500 sm:text-base">Compra deportiva clara, acompañada y sin vueltas.</p>
         </div>
 
         <div className="grid grid-cols-2 border-l border-t border-neutral-200 md:grid-cols-4">
@@ -143,9 +140,7 @@ export default async function Home() {
               <h2 className="mt-5 max-w-2xl text-4xl font-black leading-[0.95] tracking-[-0.045em] text-neutral-950 sm:text-5xl">
                 Envío <span className="text-white">GRATIS</span> por Zoom y Tealca.
               </h2>
-              <p className="mt-4 max-w-xl text-sm leading-6 text-emerald-950/80 sm:text-base">
-                Compra desde cualquier parte de Venezuela y coordinamos tu despacho de forma directa. Sin convertir el envío en una complicación.
-              </p>
+              <p className="mt-4 max-w-xl text-sm font-semibold text-emerald-950/80 sm:text-base">Disponible para despachos nacionales coordinados por WhatsApp.</p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
@@ -156,14 +151,13 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 pb-4 lg:px-8 lg:pb-6">
+      <section className="mx-auto max-w-7xl px-4 pb-10 lg:px-8 lg:pb-14">
         <div className="relative overflow-hidden rounded-[32px] bg-neutral-950 p-6 text-white sm:p-9 lg:p-12">
           <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full border-[42px] border-emerald-500/10" />
           <div className="relative grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-center">
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">LCDS Mayoristas</p>
               <h2 className="mt-2 max-w-2xl text-3xl font-black leading-[1.03] tracking-tight sm:text-4xl">{data.settings.wholesaleTitle}</h2>
-              <p className="mt-4 max-w-xl text-sm leading-6 text-neutral-400 sm:text-base">{data.settings.wholesaleText}</p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href="/mayoristas" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-500 px-5 text-sm font-black text-neutral-950 transition hover:-translate-y-0.5 hover:bg-emerald-400">
                   VER PÁGINA MAYORISTA
@@ -186,20 +180,6 @@ export default async function Home() {
               <WholesalePoint number="04" title="Volumen" text="Mejor precio según cantidad." />
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-10 lg:px-8 lg:py-14">
-        <div className="mb-6 max-w-2xl">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Comprar debe sentirse fácil</p>
-          <h2 className="mt-2 text-3xl font-black tracking-tight">Menos ruido. Más claridad.</h2>
-          <p className="mt-3 text-sm leading-6 text-neutral-500">Los métodos de pago, cantidades y datos importantes aparecen donde realmente los necesitas: dentro de cada producto y al momento de preparar el pedido.</p>
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-3">
-          <ProcessStep number="01" title="Elige tu producto" text="Revisa fotos, reputación, precio, stock y detalles." />
-          <ProcessStep number="02" title="Define cantidad y pago" text="En la ficha seleccionas cómo quieres completar tu compra." />
-          <ProcessStep number="03" title="Confirma por WhatsApp" text="Recibimos tu pedido organizado y coordinamos el despacho." />
         </div>
       </section>
 
@@ -269,18 +249,6 @@ function WholesalePoint({ number, title, text }: { number: string; title: string
       <span className="text-[10px] font-black text-emerald-400">{number}</span>
       <p className="mt-4 text-sm font-black">{title}</p>
       <p className="mt-1 text-xs leading-5 text-neutral-500">{text}</p>
-    </div>
-  );
-}
-
-function ProcessStep({ number, title, text }: { number: string; title: string; text: string }) {
-  return (
-    <div className="group relative overflow-hidden rounded-[24px] border border-neutral-200 bg-neutral-50 p-5 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-[0_18px_45px_rgba(0,0,0,0.06)]">
-      <span className="absolute right-4 top-2 text-5xl font-black tracking-[-0.08em] text-neutral-100 transition group-hover:text-emerald-50">{number}</span>
-      <div className="relative pt-10">
-        <h3 className="text-lg font-black">{title}</h3>
-        <p className="mt-2 text-sm leading-6 text-neutral-500">{text}</p>
-      </div>
     </div>
   );
 }
