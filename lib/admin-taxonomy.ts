@@ -104,14 +104,19 @@ export async function saveTaxonomyItem(kind: TaxonomyKind, input: { id?: number;
 
   if (kind === "brand") {
     if (input.id) {
-      const rows = await sql`
-        update catalog_brands
-        set name = ${name}, slug = ${slug}, active = ${input.active ?? true}, updated_at = now()
-        where id = ${input.id}
-        returning id
-      `;
-      if (!rows[0]) throw new Error("Marca no encontrada");
-      return Number(rows[0].id);
+      return sql.begin(async (tx) => {
+        const current = await tx`select name from catalog_brands where id = ${input.id} limit 1`;
+        if (!current[0]) throw new Error("Marca no encontrada");
+        const oldName = String(current[0].name);
+        const rows = await tx`
+          update catalog_brands
+          set name = ${name}, slug = ${slug}, active = ${input.active ?? true}, updated_at = now()
+          where id = ${input.id}
+          returning id
+        `;
+        if (oldName !== name) await tx`update products set brand = ${name}, updated_at = now() where brand = ${oldName}`;
+        return Number(rows[0].id);
+      });
     }
     const rows = await sql`
       insert into catalog_brands (name, slug, active, sort_order)
@@ -122,14 +127,19 @@ export async function saveTaxonomyItem(kind: TaxonomyKind, input: { id?: number;
   }
 
   if (input.id) {
-    const rows = await sql`
-      update catalog_categories
-      set name = ${name}, slug = ${slug}, active = ${input.active ?? true}, updated_at = now()
-      where id = ${input.id}
-      returning id
-    `;
-    if (!rows[0]) throw new Error("Categoría no encontrada");
-    return Number(rows[0].id);
+    return sql.begin(async (tx) => {
+      const current = await tx`select name from catalog_categories where id = ${input.id} limit 1`;
+      if (!current[0]) throw new Error("Categoría no encontrada");
+      const oldName = String(current[0].name);
+      const rows = await tx`
+        update catalog_categories
+        set name = ${name}, slug = ${slug}, active = ${input.active ?? true}, updated_at = now()
+        where id = ${input.id}
+        returning id
+      `;
+      if (oldName !== name) await tx`update products set category = ${name}, updated_at = now() where category = ${oldName}`;
+      return Number(rows[0].id);
+    });
   }
 
   const rows = await sql`
