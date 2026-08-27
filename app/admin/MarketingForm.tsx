@@ -123,6 +123,19 @@ export default function MarketingForm({ settings: initialSettings, banners: init
       </section>
 
       <section className="rounded-3xl bg-white p-5 sm:p-7">
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Footer</p>
+        <h2 className="mt-1 text-2xl font-black">Horario y redes sociales</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">Estos datos aparecerán al final de la tienda. Si dejas una red vacía, no se mostrará.</p>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <Field label="Horario de atención" value={settings.businessHours} onChange={(value) => setSettings({ ...settings, businessHours: value })} placeholder="Ej. Lunes a sábado · 9:00 a.m. a 6:00 p.m." />
+          <Field label="Instagram" value={settings.instagramUrl || ""} onChange={(value) => setSettings({ ...settings, instagramUrl: value || null })} placeholder="https://instagram.com/..." />
+          <Field label="TikTok" value={settings.tiktokUrl || ""} onChange={(value) => setSettings({ ...settings, tiktokUrl: value || null })} placeholder="https://tiktok.com/@..." />
+          <Field label="Facebook" value={settings.facebookUrl || ""} onChange={(value) => setSettings({ ...settings, facebookUrl: value || null })} placeholder="https://facebook.com/..." />
+        </div>
+      </section>
+
+      <section className="rounded-3xl bg-white p-5 sm:p-7">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Portada</p>
