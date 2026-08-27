@@ -5,20 +5,27 @@ import { useEffect, useMemo, useState } from "react";
 import type { StoreBanner } from "@/lib/catalog";
 
 export default function BannerCarousel({ banners }: { banners: StoreBanner[] }) {
-  const items = useMemo(() => banners.slice(0, 3), [banners]);
+  const items = useMemo(
+    () => banners.filter((banner) => banner.active && Boolean(banner.imageUrl)).slice(0, 3),
+    [banners],
+  );
   const [active, setActive] = useState(0);
 
   useEffect(() => {
+    if (active >= items.length) setActive(0);
+  }, [active, items.length]);
+
+  useEffect(() => {
     if (items.length <= 1) return;
+
     const timer = window.setInterval(() => {
       setActive((current) => (current + 1) % items.length);
-    }, 6500);
+    }, 5500);
+
     return () => window.clearInterval(timer);
   }, [items.length]);
 
   if (!items.length) return null;
-
-  const current = items[Math.min(active, items.length - 1)];
 
   function move(direction: number) {
     setActive((index) => (index + direction + items.length) % items.length);
@@ -27,50 +34,60 @@ export default function BannerCarousel({ banners }: { banners: StoreBanner[] }) 
   return (
     <section className="relative overflow-hidden rounded-[30px] bg-neutral-950 shadow-[0_18px_50px_rgba(0,0,0,0.12)]">
       <div className="relative min-h-[390px] sm:min-h-[430px] lg:min-h-[510px]">
-        <picture key={`${current.id}-${active}`} className="absolute inset-0 block">
-          {current.mobileImageUrl && (
-            <source media="(max-width: 767px)" srcSet={current.mobileImageUrl} />
-          )}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={current.imageUrl}
-            alt={current.title || "Banner LCDS Sports"}
-            className="banner-enter h-full w-full object-cover"
-          />
-        </picture>
+        {items.map((banner, index) => (
+          <div
+            key={banner.id}
+            aria-hidden={index !== active}
+            className={`absolute inset-0 transition-opacity duration-700 ${
+              index === active ? "z-0 opacity-100" : "pointer-events-none -z-10 opacity-0"
+            }`}
+          >
+            <picture className="absolute inset-0 block">
+              {banner.mobileImageUrl && (
+                <source media="(max-width: 767px)" srcSet={banner.mobileImageUrl} />
+              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={banner.imageUrl}
+                alt={banner.title || `Banner ${index + 1} LCDS Sports`}
+                className="h-full w-full object-cover"
+              />
+            </picture>
 
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,8,6,0.90)_0%,rgba(4,8,6,0.68)_42%,rgba(4,8,6,0.12)_76%,rgba(4,8,6,0.08)_100%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(0,0,0,0.5)_0%,transparent_48%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(4,8,6,0.90)_0%,rgba(4,8,6,0.68)_42%,rgba(4,8,6,0.12)_76%,rgba(4,8,6,0.08)_100%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(0,0,0,0.5)_0%,transparent_48%)]" />
 
-        <div className="relative z-10 flex min-h-[390px] max-w-2xl flex-col justify-end px-6 pb-9 pt-16 text-white sm:min-h-[430px] sm:px-9 sm:pb-11 lg:min-h-[510px] lg:px-14 lg:pb-16">
-          <div className="mb-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.24em] text-emerald-400">
-            <span className="h-px w-8 bg-emerald-400" />
-            LCDS Sports · Venezuela
-          </div>
-          {current.title && (
-            <h1 className="max-w-xl text-4xl font-black uppercase leading-[0.92] tracking-[-0.045em] sm:text-5xl lg:text-6xl">
-              {current.title}
-            </h1>
-          )}
-          {current.subtitle && (
-            <p className="mt-4 max-w-lg text-sm leading-6 text-neutral-200 sm:text-base sm:leading-7">
-              {current.subtitle}
-            </p>
-          )}
-          {current.ctaText && current.ctaHref && (
-            <div className="mt-6">
-              <Link
-                href={current.ctaHref}
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-500 px-5 text-sm font-black text-neutral-950 transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-400"
-              >
-                {current.ctaText}
-                <svg viewBox="0 0 24 24" className="ml-2 h-4 w-4 fill-none stroke-current" strokeWidth="2">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
-              </Link>
+            <div className="relative z-10 flex min-h-[390px] max-w-2xl flex-col justify-end px-6 pb-9 pt-16 text-white sm:min-h-[430px] sm:px-9 sm:pb-11 lg:min-h-[510px] lg:px-14 lg:pb-16">
+              <div className="mb-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.24em] text-emerald-400">
+                <span className="h-px w-8 bg-emerald-400" />
+                LCDS Sports · Venezuela
+              </div>
+              {banner.title && (
+                <h1 className="max-w-xl text-4xl font-black uppercase leading-[0.92] tracking-[-0.045em] sm:text-5xl lg:text-6xl">
+                  {banner.title}
+                </h1>
+              )}
+              {banner.subtitle && (
+                <p className="mt-4 max-w-lg text-sm leading-6 text-neutral-200 sm:text-base sm:leading-7">
+                  {banner.subtitle}
+                </p>
+              )}
+              {banner.ctaText && banner.ctaHref && (
+                <div className="mt-6">
+                  <Link
+                    href={banner.ctaHref}
+                    className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-500 px-5 text-sm font-black text-neutral-950 transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-400"
+                  >
+                    {banner.ctaText}
+                    <svg viewBox="0 0 24 24" className="ml-2 h-4 w-4 fill-none stroke-current" strokeWidth="2">
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </Link>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        ))}
 
         {items.length > 1 && (
           <>
