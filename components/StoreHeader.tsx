@@ -16,20 +16,66 @@ const nav = [
 export default function StoreHeader({ settings }: { settings: StoreSettings }) {
   const [open, setOpen] = useState(false);
   const whatsappHref = `https://wa.me/${settings.whatsappPhone}`;
+  const announcementMessages = (settings.announcementMessages?.length ? settings.announcementMessages : [settings.announcementText])
+    .map((message) => message.trim())
+    .filter(Boolean);
 
   return (
     <>
-      {settings.announcementEnabled && (
-        <div className="relative z-50 border-b border-white/5 bg-neutral-950 px-4 py-2.5 text-white">
-          <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 text-center text-[9px] font-black uppercase tracking-[0.18em] sm:text-[10px]">
-            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.8)]" />
-            {settings.announcementLink ? (
-              <Link href={settings.announcementLink} className="transition hover:text-emerald-400">
-                {settings.announcementText}
-              </Link>
-            ) : (
-              <span>{settings.announcementText}</span>
-            )}
+      {settings.announcementEnabled && announcementMessages.length > 0 && (
+        <div className="announcement-bar relative z-50 overflow-hidden border-b border-white/10 bg-neutral-950 text-white">
+          <div className="flex h-9 items-center sm:h-10">
+            <div className="relative z-20 flex h-full shrink-0 items-center gap-2 border-r border-white/10 bg-neutral-950 px-3.5 sm:px-5">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-50" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+              </span>
+              <span className="text-[9px] font-black uppercase tracking-[0.22em] text-white sm:text-[10px]">LCDS</span>
+            </div>
+
+            <div className="relative min-w-0 flex-1 overflow-hidden">
+              <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-neutral-950 to-transparent sm:w-12" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-neutral-950 to-transparent sm:w-12" />
+
+              {announcementMessages.length === 1 ? (
+                <div className="flex h-full items-center px-5 text-[9px] font-black uppercase tracking-[0.16em] text-white/85 sm:px-7 sm:text-[10px]">
+                  {settings.announcementLink ? (
+                    <Link href={settings.announcementLink} className="transition hover:text-emerald-400">
+                      {announcementMessages[0]}
+                    </Link>
+                  ) : (
+                    <span>{announcementMessages[0]}</span>
+                  )}
+                </div>
+              ) : (
+                <div className="announcement-marquee-track flex w-max items-center whitespace-nowrap">
+                  {[0, 1].map((copyIndex) => (
+                    <div
+                      key={copyIndex}
+                      aria-hidden={copyIndex === 1}
+                      className="flex min-w-[max(100vw,72rem)] shrink-0 items-center justify-around gap-10 px-7 sm:gap-14 sm:px-10 lg:gap-20 lg:px-14"
+                    >
+                      {announcementMessages.map((message, index) => {
+                        const content = (
+                          <span className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.15em] text-white/82 transition hover:text-white sm:text-[10px]">
+                            <span className="text-emerald-400">◆</span>
+                            {message}
+                          </span>
+                        );
+
+                        return settings.announcementLink ? (
+                          <Link key={`${copyIndex}-${index}`} href={settings.announcementLink} className="py-3">
+                            {content}
+                          </Link>
+                        ) : (
+                          <span key={`${copyIndex}-${index}`} className="py-3">{content}</span>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
