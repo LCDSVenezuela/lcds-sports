@@ -4,6 +4,7 @@ import { requireAdminPage } from "@/lib/admin-auth";
 import { getCatalogSnapshot } from "@/lib/catalog";
 import { fallbackCatalog } from "@/lib/fallback";
 import MarketingForm from "./MarketingForm";
+import PaymentMethodsForm from "./PaymentMethodsForm";
 import RateForm from "./RateForm";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +61,8 @@ export default async function AdminPage() {
               <p className="mt-2 text-sm leading-6 text-emerald-950/80">Gestiona título, descripción, galería, USD, referencia BCV, stock, reputación, etiquetas y precios al mayor.</p>
               <span className="mt-5 inline-block text-sm font-black text-neutral-950 transition group-hover:translate-x-1">Gestionar productos →</span>
             </Link>
+
+            <PaymentMethodsForm initialMethods={snapshot.paymentMethods} />
           </div>
 
           <div>
