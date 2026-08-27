@@ -1,17 +1,24 @@
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { issueSignedToken } from "@vercel/blob";
+import {
+  handleUploadPresigned,
+  type HandleUploadPresignedBody,
+} from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
+const allowedContentTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+const maximumSizeInBytes = 8 * 1024 * 1024;
+
 export async function POST(request: Request) {
-  const body = (await request.json()) as HandleUploadBody;
+  const body = (await request.json()) as HandleUploadPresignedBody;
 
   try {
-    const jsonResponse = await handleUpload({
+    const jsonResponse = await handleUploadPresigned({
       body,
       request,
-      onBeforeGenerateToken: async (pathname, clientPayload) => {
+      getSignedToken: async (pathname, clientPayload) => {
         const session = await getAdminSession();
         if (!session) throw new Error("No autorizado");
 
@@ -25,14 +32,32 @@ export async function POST(request: Request) {
           throw new Error("Ruta de carga inválida");
         }
 
+        const readWriteToken = process.env.BLOB_READ_WRITE_TOKEN;
+        const oidcToken = process.env.VERCEL_OIDC_TOKEN;
+        const storeId = process.env.BLOB_STORE_ID;
+
+        if (!readWriteToken && !(oidcToken && storeId)) {
+          throw new Error("Falta la conexión de Vercel Blob para este entorno");
+        }
+
+        const token = await issueSignedToken({
+          pathname,
+          operations: ["put"],
+          allowedContentTypes,
+          maximumSizeInBytes,
+          ...(readWriteToken
+            ? { token: readWriteToken }
+            : { oidcToken: oidcToken as string, storeId: storeId as string }),
+        });
+
         return {
-          allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/avif"],
-          maximumSizeInBytes: 8 * 1024 * 1024,
-          addRandomSuffix: true,
-          tokenPayload: JSON.stringify({
-            userId: session.userId,
-            folder: requestedFolder,
-          }),
+          token,
+          urlOptions: {
+            allowedContentTypes,
+            maximumSizeInBytes,
+            addRandomSuffix: true,
+            allowOverwrite: false,
+          },
         };
       },
       onUploadCompleted: async () => {
