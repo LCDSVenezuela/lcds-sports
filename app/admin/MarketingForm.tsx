@@ -40,6 +40,8 @@ export default function MarketingForm({ settings: initialSettings, banners: init
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const activeBannerCount = banners.filter((banner) => banner.active && banner.imageUrl.trim()).length;
+
   function updateBanner(index: number, patch: Partial<EditableBanner>) {
     setBanners((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, ...patch } : item)));
   }
@@ -62,7 +64,8 @@ export default function MarketingForm({ settings: initialSettings, banners: init
         return;
       }
       if (!response.ok) throw new Error(data?.error || "No se pudo guardar la configuración");
-      setStatus("Marketing y banners actualizados correctamente.");
+      const count = banners.filter((banner) => banner.active && banner.imageUrl.trim()).length;
+      setStatus(`Marketing actualizado. ${count} banner${count === 1 ? "" : "s"} activo${count === 1 ? "" : "s"} en la portada.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Ocurrió un error");
     } finally {
@@ -104,7 +107,7 @@ export default function MarketingForm({ settings: initialSettings, banners: init
             <h2 className="mt-1 text-2xl font-black">Banners principales</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">Hasta 3 banners. Sube la imagen directamente desde el teléfono o la PC. Puedes usar una imagen móvil distinta para controlar mejor el recorte.</p>
           </div>
-          <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-neutral-500">Máximo 3</span>
+          <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-neutral-500">{activeBannerCount}/3 activos</span>
         </div>
 
         <div className="mt-6 space-y-5">
@@ -122,7 +125,13 @@ export default function MarketingForm({ settings: initialSettings, banners: init
               </div>
 
               <div className="mt-5 grid gap-5 lg:grid-cols-2">
-                <ImageUploader label="Imagen general" value={banner.imageUrl} onChange={(value) => updateBanner(index, { imageUrl: value })} folder={`banners/banner-${index + 1}`} aspect="banner" />
+                <ImageUploader
+                  label="Imagen general"
+                  value={banner.imageUrl}
+                  onChange={(value) => updateBanner(index, { imageUrl: value, ...(value ? { active: true } : {}) })}
+                  folder={`banners/banner-${index + 1}`}
+                  aspect="banner"
+                />
                 <ImageUploader label="Imagen móvil" value={banner.mobileImageUrl} onChange={(value) => updateBanner(index, { mobileImageUrl: value })} folder={`banners/banner-${index + 1}-mobile`} aspect="banner" optional />
               </div>
 
