@@ -16,13 +16,10 @@ export default function BannerCarousel({ banners }: { banners: StoreBanner[] }) 
     return () => window.clearTimeout(timeout);
   }, [active, items.length]);
 
-  useEffect(() => {
-    if (active >= items.length) setActive(0);
-  }, [active, items.length]);
-
   if (!items.length) return null;
 
-  const current = items[active % items.length];
+  const safeActive = active % items.length;
+  const current = items[safeActive];
 
   function move(direction: number) {
     if (items.length <= 1) return;
@@ -32,13 +29,12 @@ export default function BannerCarousel({ banners }: { banners: StoreBanner[] }) 
   return (
     <section className="group relative isolate overflow-hidden rounded-[28px] bg-neutral-950 shadow-[0_24px_80px_rgba(0,0,0,0.14)] sm:rounded-[34px]">
       <div className="relative min-h-[460px] sm:min-h-[500px] lg:min-h-[560px]">
-        <picture key={`banner-picture-${current.id}-${active}`} className="absolute inset-0 block">
+        <picture key={`banner-picture-${current.id}-${safeActive}`} className="absolute inset-0 block">
           {current.mobileImageUrl && <source media="(max-width: 767px)" srcSet={current.mobileImageUrl} />}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            key={`banner-image-${current.id}-${active}`}
+            key={`banner-image-${current.id}-${safeActive}`}
             src={current.imageUrl}
-            alt={current.title || `Banner ${active + 1} LCDS Sports`}
+            alt={current.title || `Banner ${safeActive + 1} LCDS Sports`}
             className="banner-enter h-full w-full object-cover"
           />
         </picture>
@@ -53,7 +49,7 @@ export default function BannerCarousel({ banners }: { banners: StoreBanner[] }) 
         </div>
 
         <div
-          key={`banner-copy-${current.id}-${active}`}
+          key={`banner-copy-${current.id}-${safeActive}`}
           className="relative z-10 flex min-h-[460px] max-w-[780px] flex-col justify-end px-5 pb-20 pt-24 text-white sm:min-h-[500px] sm:px-8 sm:pb-20 lg:min-h-[560px] lg:px-14 lg:pb-24"
         >
           <div className="mb-4 flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.24em] text-emerald-400 sm:text-[10px]">
@@ -102,12 +98,12 @@ export default function BannerCarousel({ banners }: { banners: StoreBanner[] }) 
                 type="button"
                 onClick={() => setActive(index)}
                 aria-label={`Ir al banner ${index + 1}`}
-                className={`h-1.5 rounded-full transition-all duration-300 ${index === active ? "w-9 bg-emerald-400" : "w-3 bg-white/35 hover:bg-white/70"}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${index === safeActive ? "w-9 bg-emerald-400" : "w-3 bg-white/35 hover:bg-white/70"}`}
               />
             ))}
             {items.length > 1 && (
               <span className="ml-1 text-[9px] font-black tracking-[0.16em] text-white/50">
-                0{active + 1} / 0{items.length}
+                0{safeActive + 1} / 0{items.length}
               </span>
             )}
           </div>
