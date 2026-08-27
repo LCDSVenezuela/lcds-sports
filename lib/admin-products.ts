@@ -30,6 +30,24 @@ export type ProductAdminInput = {
   }>;
 };
 
+export type AdminProductListItem = {
+  id: number;
+  name: string;
+  slug: string;
+  sku: string | null;
+  brand: string;
+  category: string;
+  image: string | null;
+  badge: string | null;
+  priceUsd: number;
+  bcvReferenceUsd: number;
+  stock: number;
+  active: boolean;
+  featured: boolean;
+  rating: number;
+  sortOrder: number;
+};
+
 function validateProduct(input: ProductAdminInput) {
   if (!input.name.trim()) throw new Error("El nombre es obligatorio");
   if (!input.slug.trim()) throw new Error("El slug es obligatorio");
@@ -37,6 +55,112 @@ function validateProduct(input: ProductAdminInput) {
   if (!Number.isFinite(input.priceUsd) || input.priceUsd < 0) throw new Error("Precio USD inválido");
   if (!Number.isFinite(input.bcvReferenceUsd) || input.bcvReferenceUsd < 0) throw new Error("Referencia BCV inválida");
   if (!Number.isFinite(input.stock) || input.stock < 0) throw new Error("Stock inválido");
+}
+
+export async function getAdminProducts(): Promise<AdminProductListItem[]> {
+  await ensureCatalogSchema();
+  const rows = await db()`
+    select
+      id, name, slug, sku, brand, category, image, badge,
+      price_usd_cents, bcv_reference_usd_cents, stock,
+      active, featured, rating_e2, sort_order
+    from products
+    order by sort_order asc, id asc
+  `;
+
+  return rows.map((row) => ({
+    id: Number(row.id),
+    name: String(row.name),
+    slug: String(row.slug),
+    sku: row.sku ? String(row.sku) : null,
+    brand: String(row.brand),
+    category: String(row.category ?? "Softball"),
+    image: row.image ? String(row.image) : null,
+    badge: row.badge ? String(row.badge) : null,
+    priceUsd: Number(row.price_usd_cents) / 100,
+    bcvReferenceUsd: Number(row.bcv_reference_usd_cents) / 100,
+    stock: Number(row.stock),
+    active: Boolean(row.active),
+    featured: Boolean(row.featured),
+    rating: Number(row.rating_e2 ?? 0) / 100,
+    sortOrder: Number(row.sort_order ?? 0),
+  }));
+}
+
+export async function setProductActive(id: number, active: boolean) {
+  await ensureCatalogSchema();
+  const rows = await db()`
+    update products
+    set active = ${active}, updated_at = now()
+    where id = ${id}
+    returning id
+  `;
+  if (!rows[0]) throw new Error("Producto no encontrado");
+}
+
+export async function setProductStock(id: number, stock: number) {
+  if (!Number.isFinite(stock) || stock < 0) throw new Error("Stock inválido");
+  await ensureCatalogSchema();
+  const rows = await db()`
+    update products
+    set stock = ${Math.round(stock)}, updated_at = now()
+    where id = ${id}
+    returning id
+  `;
+  if (!rows[0]) throw new Error("Producto no encontrado");
+}
+
+export async function moveProduct(id: number, direction: "up" | "down") {
+  await ensureCatalogSchema();
+  const sql = db();
+
+  await sql.begin(async (tx) => {
+    const currentRows = await tx`
+      select id, sort_order
+      from products
+      where id = ${id}
+      limit 1
+    `;
+    const current = currentRows[0];
+    if (!current) throw new Error("Producto no encontrado");
+
+    const targetRows = direction === "up"
+      ? await tx`
+          select id, sort_order
+          from products
+          where sort_order < ${Number(current.sort_order)}
+             or (sort_order = ${Number(current.sort_order)} and id < ${id})
+          order by sort_order desc, id desc
+          limit 1
+        `
+      : await tx`
+          select id, sort_order
+          from products
+          where sort_order > ${Number(current.sort_order)}
+             or (sort_order = ${Number(current.sort_order)} and id > ${id})
+          order by sort_order asc, id asc
+          limit 1
+        `;
+
+    const target = targetRows[0];
+    if (!target) return;
+
+    const currentOrder = Number(current.sort_order);
+    const targetOrder = Number(target.sort_order);
+
+    await tx`update products set sort_order = ${targetOrder}, updated_at = now() where id = ${id}`;
+    await tx`update products set sort_order = ${currentOrder}, updated_at = now() where id = ${Number(target.id)}`;
+  });
+}
+
+export async function deleteProduct(id: number) {
+  await ensureCatalogSchema();
+  const rows = await db()`
+    delete from products
+    where id = ${id}
+    returning id
+  `;
+  if (!rows[0]) throw new Error("Producto no encontrado");
 }
 
 export async function saveProduct(input: ProductAdminInput) {
