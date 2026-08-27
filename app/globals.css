@@ -59,6 +59,15 @@ textarea {
   animation-play-state: paused;
 }
 
+.announcement-marquee-track {
+  animation: announcement-marquee 28s linear infinite;
+  will-change: transform;
+}
+
+.announcement-bar:hover .announcement-marquee-track {
+  animation-play-state: paused;
+}
+
 @keyframes banner-enter {
   from {
     opacity: 0.55;
@@ -90,6 +99,15 @@ textarea {
   }
 }
 
+@keyframes announcement-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -100,7 +118,8 @@ textarea {
     transition-duration: 0.01ms !important;
   }
 
-  .brand-marquee-track {
+  .brand-marquee-track,
+  .announcement-marquee-track {
     animation: none !important;
     transform: none !important;
   }
