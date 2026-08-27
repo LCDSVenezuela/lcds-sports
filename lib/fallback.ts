@@ -4,7 +4,13 @@ export const fallbackCatalog: CatalogSnapshot = {
   rateBcv: 250,
   settings: {
     announcementEnabled: true,
-    announcementText: "Envío GRATIS por Zoom y Tealca · Atención directa por WhatsApp",
+    announcementText: "Envío GRATIS por Zoom y Tealca a toda Venezuela",
+    announcementMessages: [
+      "Envío GRATIS por Zoom y Tealca a toda Venezuela",
+      "Precios en USD y Bs. con tasa vigente",
+      "Ventas al mayor para equipos, academias y comercios",
+      "Atención directa por WhatsApp",
+    ],
     announcementLink: null,
     whatsappPhone: "584225329551",
     locationText: "Portuguesa, Venezuela",
