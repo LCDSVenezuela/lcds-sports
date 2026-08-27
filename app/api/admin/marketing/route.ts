@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/admin-auth";
-import { saveBanners, updateStoreSettings } from "@/lib/catalog";
+import { getCatalogSnapshot, saveBanners, updateStoreSettings } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +47,14 @@ export async function POST(request: NextRequest) {
       })),
     );
 
-    return NextResponse.json({ ok: true });
+    // Leemos nuevamente desde la base para confirmar cuántos banners activos
+    // quedaron realmente disponibles para la portada.
+    const snapshot = await getCatalogSnapshot();
+
+    return NextResponse.json({
+      ok: true,
+      bannerCount: snapshot.banners.length,
+    });
   } catch (error) {
     console.error("No se pudo actualizar marketing", error);
     return NextResponse.json({ ok: false, error: "No se pudieron guardar los cambios" }, { status: 500 });
