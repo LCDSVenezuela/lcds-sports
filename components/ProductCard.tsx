@@ -43,7 +43,7 @@ export default function ProductCard({ product, rateBcv }: { product: CatalogProd
           <div className="pointer-events-none absolute inset-x-5 bottom-0 h-px origin-left scale-x-0 bg-emerald-500 transition duration-300 group-hover:scale-x-100" />
         </div>
 
-        <div className="flex min-h-[220px] flex-col p-4 sm:min-h-[236px] sm:p-5">
+        <div className="flex min-h-[205px] flex-col p-4 sm:min-h-[220px] sm:p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="truncate text-[8px] font-black uppercase tracking-[0.18em] text-neutral-400 sm:text-[9px]">{product.brand}</p>
@@ -68,7 +68,6 @@ export default function ProductCard({ product, rateBcv }: { product: CatalogProd
                 {product.stock > 0 ? "Disponible" : "Agotado"}
               </span>
             </div>
-            <p className="mt-2 text-[8px] font-semibold leading-4 text-neutral-400 sm:text-[9px]">USD público · Bs. calculado con tasa vigente</p>
           </div>
         </div>
       </Link>
