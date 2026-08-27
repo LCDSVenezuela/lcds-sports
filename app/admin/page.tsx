@@ -32,6 +32,7 @@ export default async function AdminPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/admin/productos" className="flex min-h-11 items-center rounded-xl border border-white/15 px-4 text-xs font-black transition hover:bg-white/10">PRODUCTOS</Link>
+            <Link href="/admin/catalogo" className="flex min-h-11 items-center rounded-xl border border-white/15 px-4 text-xs font-black transition hover:bg-white/10">MARCAS / CATEGORÍAS</Link>
             <Link href="/" className="flex min-h-11 items-center rounded-xl bg-emerald-500 px-4 text-xs font-black text-neutral-950">VER TIENDA</Link>
             <AdminLogoutButton />
           </div>
@@ -60,6 +61,13 @@ export default async function AdminPage() {
               <h2 className="mt-2 text-2xl font-black text-neutral-950">Productos, imágenes y precios</h2>
               <p className="mt-2 text-sm leading-6 text-emerald-950/80">Gestiona título, descripción, galería, USD, referencia BCV, stock, reputación, etiquetas y precios al mayor.</p>
               <span className="mt-5 inline-block text-sm font-black text-neutral-950 transition group-hover:translate-x-1">Gestionar productos →</span>
+            </Link>
+
+            <Link href="/admin/catalogo" className="group block rounded-3xl bg-white p-6 transition hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(0,0,0,0.06)] sm:p-7">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Organización</p>
+              <h2 className="mt-2 text-2xl font-black text-neutral-950">Marcas y categorías</h2>
+              <p className="mt-2 text-sm leading-6 text-neutral-500">Crea, edita y activa las opciones que aparecerán al registrar productos.</p>
+              <span className="mt-5 inline-block text-sm font-black text-neutral-950 transition group-hover:translate-x-1">Organizar catálogo →</span>
             </Link>
 
             <PaymentMethodsForm initialMethods={snapshot.paymentMethods} />
