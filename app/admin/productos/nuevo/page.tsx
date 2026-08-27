@@ -1,6 +1,7 @@
 import Link from "next/link";
 import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 import { requireAdminPage } from "@/lib/admin-auth";
+import { getTaxonomies } from "@/lib/admin-taxonomy";
 import { getCatalogSnapshot } from "@/lib/catalog";
 import { fallbackCatalog } from "@/lib/fallback";
 import ProductForm from "../ProductForm";
@@ -10,10 +11,16 @@ export const dynamic = "force-dynamic";
 export default async function NewProductPage() {
   await requireAdminPage();
   let rateBcv = fallbackCatalog.rateBcv;
+  let brands: string[] = [];
+  let categories: string[] = [];
+
   try {
-    rateBcv = (await getCatalogSnapshot()).rateBcv;
+    const [catalog, taxonomies] = await Promise.all([getCatalogSnapshot(), getTaxonomies(false)]);
+    rateBcv = catalog.rateBcv;
+    brands = taxonomies.brands.map((item) => item.name);
+    categories = taxonomies.categories.map((item) => item.name);
   } catch {
-    // Usa la tasa fallback si la base aún no está lista.
+    // Usa valores fallback si la base aún no está lista.
   }
 
   return (
@@ -26,12 +33,13 @@ export default async function NewProductPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/admin/productos" className="flex min-h-11 items-center rounded-xl border border-white/15 px-4 text-xs font-black">VOLVER</Link>
+            <Link href="/admin/catalogo" className="flex min-h-11 items-center rounded-xl border border-white/15 px-4 text-xs font-black">MARCAS / CATEGORÍAS</Link>
             <AdminLogoutButton />
           </div>
         </div>
       </header>
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-        <ProductForm rateBcv={rateBcv} />
+        <ProductForm rateBcv={rateBcv} brands={brands} categories={categories} />
       </div>
     </main>
   );
