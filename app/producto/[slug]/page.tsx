@@ -101,7 +101,7 @@ export default async function ProductPage({
                 </div>
                 <div>
                   <p className="text-sm font-black">Envío gratis nacional</p>
-                  <p className="mt-1 text-xs leading-5 text-emerald-950/75">Puedes coordinar tu despacho por Zoom o Tealca al confirmar el pedido.</p>
+                  <p className="mt-1 text-xs leading-5 text-emerald-950/75">Puedes elegir Zoom o Tealca al preparar el pedido.</p>
                 </div>
               </div>
             )}
@@ -116,6 +116,9 @@ export default async function ProductPage({
                 phone={snapshot.settings.whatsappPhone}
                 paymentMethods={snapshot.paymentMethods}
                 stock={product.stock}
+                wholesaleEnabled={product.wholesaleEnabled}
+                wholesaleTiers={product.wholesaleTiers}
+                freeShipping={product.freeShipping}
               />
             </div>
 
@@ -123,9 +126,8 @@ export default async function ProductPage({
               <div className="flex items-end justify-between gap-4">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">Métodos de pago</p>
-                  <p className="mt-1 text-sm font-black">Elige el que te resulte más cómodo</p>
+                  <p className="mt-1 text-sm font-black">Disponibles al confirmar tu pedido</p>
                 </div>
-                <span className="text-[10px] font-bold text-neutral-400">Al confirmar</span>
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
                 {snapshot.paymentMethods.map((method) => (
