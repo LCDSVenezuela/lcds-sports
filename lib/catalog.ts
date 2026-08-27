@@ -69,6 +69,10 @@ export type StoreSettings = {
   shippingText: string;
   wholesaleTitle: string;
   wholesaleText: string;
+  businessHours: string;
+  instagramUrl: string | null;
+  tiktokUrl: string | null;
+  facebookUrl: string | null;
 };
 
 export type CatalogSnapshot = {
@@ -173,7 +177,8 @@ async function loadStoreData() {
       sql`
         select announcement_enabled, announcement_text, announcement_messages, announcement_link,
           whatsapp_phone, location_text, shipping_text,
-          wholesale_title, wholesale_text
+          wholesale_title, wholesale_text, business_hours,
+          instagram_url, tiktok_url, facebook_url
         from store_settings
         where id = 1
         limit 1
@@ -240,6 +245,10 @@ async function loadStoreData() {
     wholesaleText: String(
       settingsRow?.wholesale_text ?? "Consulta condiciones especiales por cantidad.",
     ),
+    businessHours: String(settingsRow?.business_hours ?? ""),
+    instagramUrl: settingsRow?.instagram_url ? String(settingsRow.instagram_url) : null,
+    tiktokUrl: settingsRow?.tiktok_url ? String(settingsRow.tiktok_url) : null,
+    facebookUrl: settingsRow?.facebook_url ? String(settingsRow.facebook_url) : null,
   };
 
   const banners: StoreBanner[] = bannerRows.map((row) => ({
@@ -306,6 +315,10 @@ export async function updateStoreSettings(input: {
   shippingText: string;
   wholesaleTitle: string;
   wholesaleText: string;
+  businessHours?: string;
+  instagramUrl?: string | null;
+  tiktokUrl?: string | null;
+  facebookUrl?: string | null;
 }) {
   await ensureCatalogSchema();
   const sql = db();
@@ -327,6 +340,10 @@ export async function updateStoreSettings(input: {
       shipping_text = ${input.shippingText.trim()},
       wholesale_title = ${input.wholesaleTitle.trim()},
       wholesale_text = ${input.wholesaleText.trim()},
+      business_hours = ${input.businessHours?.trim() || ""},
+      instagram_url = ${input.instagramUrl?.trim() || null},
+      tiktok_url = ${input.tiktokUrl?.trim() || null},
+      facebook_url = ${input.facebookUrl?.trim() || null},
       updated_at = now()
     where id = 1
   `;
