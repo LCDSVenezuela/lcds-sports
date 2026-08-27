@@ -182,13 +182,11 @@ export async function ensureCatalogSchema() {
             ) then concat_ws(E'\n',
               announcement_text,
               'Envío GRATIS por Zoom y Tealca a toda Venezuela',
-              'Precios en USD y Bs. con tasa vigente',
               'Ventas al mayor para equipos, academias y comercios',
               'Atención directa por WhatsApp'
             )
             else concat_ws(E'\n',
               'Envío GRATIS por Zoom y Tealca a toda Venezuela',
-              'Precios en USD y Bs. con tasa vigente',
               'Ventas al mayor para equipos, academias y comercios',
               'Atención directa por WhatsApp'
             )
@@ -212,94 +210,7 @@ export async function ensureCatalogSchema() {
     )
   `;
 
-  await sql`
-    insert into products (
-      name, slug, brand, subtitle, image, badge,
-      price_usd_cents, bcv_reference_usd_cents,
-      stock, active, featured, sort_order,
-      sku, category, description, rating_e2, review_count, labels,
-      free_shipping, warranty_days, wholesale_enabled, wholesale_note
-    )
-    values
-      (
-        'Pelota Softball Tamanaco SB-120I',
-        'pelota-softball-tamanaco-sb-120i',
-        'Tamanaco',
-        'Importada · Bolsa Chillona',
-        '/products/tamanaco-sb120i.png',
-        'Más vendida',
-        700,
-        950,
-        50,
-        true,
-        true,
-        1,
-        'TAM-SB120I-1',
-        'Pelotas',
-        'Pelota de softball Tamanaco SB-120I importada. Diseñada para entrenamiento, juego y competencia, con excelente presencia y terminación.',
-        500,
-        2,
-        'TOP|IMPORTADA|SOFTBALL',
-        true,
-        1,
-        true,
-        'Consulta precios especiales por cantidad para equipos, academias, comercios y revendedores.'
-      ),
-      (
-        '3 Pelotas Softball Tamanaco SB-120I',
-        'pack-3-tamanaco-sb-120i',
-        'Tamanaco',
-        'Pack de 3 unidades · Bolsa Chillona',
-        '/products/tamanaco-pack3.png',
-        'Pack 3',
-        3800,
-        4200,
-        20,
-        true,
-        false,
-        2,
-        'TAM-SB120I-P3',
-        'Pelotas',
-        'Pack de 3 pelotas de softball Tamanaco SB-120I importadas, ideal para equipos, entrenamientos y reposición.',
-        500,
-        2,
-        'PACK|IMPORTADA|SOFTBALL',
-        true,
-        1,
-        true,
-        'Disponible con condiciones especiales al mayor.'
-      )
-    on conflict (slug) do nothing
-  `;
-
-  await sql`
-    update products
-    set
-      name = 'Pelota Softball Tamanaco SB-120I',
-      sku = coalesce(sku, 'TAM-SB120I-1'),
-      category = 'Pelotas',
-      description = coalesce(description, 'Pelota de softball Tamanaco SB-120I importada. Diseñada para entrenamiento, juego y competencia, con excelente presencia y terminación.'),
-      labels = case when labels = '' then 'TOP|IMPORTADA|SOFTBALL' else labels end,
-      rating_e2 = case when rating_e2 = 0 then 500 else rating_e2 end,
-      review_count = case when review_count = 0 then 2 else review_count end,
-      wholesale_note = coalesce(wholesale_note, 'Consulta precios especiales por cantidad para equipos, academias, comercios y revendedores.')
-    where slug = 'pelota-softball-tamanaco-sb-120i'
-  `;
-
-  await sql`
-    update products
-    set
-      name = '3 Pelotas Softball Tamanaco SB-120I',
-      sku = coalesce(sku, 'TAM-SB120I-P3'),
-      category = 'Pelotas',
-      description = coalesce(description, 'Pack de 3 pelotas de softball Tamanaco SB-120I importadas, ideal para equipos, entrenamientos y reposición.'),
-      labels = case when labels = '' then 'PACK|IMPORTADA|SOFTBALL' else labels end,
-      rating_e2 = case when rating_e2 = 0 then 500 else rating_e2 end,
-      review_count = case when review_count = 0 then 2 else review_count end,
-      wholesale_note = coalesce(wholesale_note, 'Disponible con condiciones especiales al mayor.')
-    where slug = 'pack-3-tamanaco-sb-120i'
-  `;
-
+  // Backfill gallery rows for real products that already have a legacy primary image.
   await sql`
     insert into product_images (product_id, image_url, alt_text, sort_order)
     select p.id, p.image, p.name, 0
@@ -311,36 +222,14 @@ export async function ensureCatalogSchema() {
   `;
 
   await sql`
-    insert into wholesale_tiers (product_id, min_quantity, price_usd_cents, bcv_reference_usd_cents, label, sort_order)
-    select p.id, 6, 650, 900, 'Desde 6 unidades', 1
-    from products p
-    where p.slug = 'pelota-softball-tamanaco-sb-120i'
-      and not exists (select 1 from wholesale_tiers wt where wt.product_id = p.id)
-  `;
-
-  await sql`
     insert into payment_methods (name, detail, sort_order)
     values
       ('Zelle', 'Precio en divisas', 1),
       ('USDT', 'Precio en divisas', 2),
       ('Divisas', 'Efectivo en USD', 3),
       ('Depósito bancario', 'Precio en divisas', 4),
-      ('Pago móvil', 'Monto calculado en Bs. según tasa vigente', 5),
-      ('Transferencia Bs.', 'Monto calculado en Bs. según tasa vigente', 6)
+      ('Pago móvil', 'Monto en Bs. según tasa vigente', 5),
+      ('Transferencia Bs.', 'Monto en Bs. según tasa vigente', 6)
     on conflict (name) do nothing
-  `;
-
-  await sql`
-    insert into banners (title, subtitle, image_url, mobile_image_url, cta_text, cta_href, active, sort_order)
-    select
-      'La Casa del Softball',
-      'Pelotas, equipamiento y artículos deportivos con envíos a toda Venezuela.',
-      '/products/tamanaco-pack3.png',
-      '/products/tamanaco-pack3.png',
-      'Ver productos',
-      '#productos',
-      true,
-      1
-    where not exists (select 1 from banners)
   `;
 }
