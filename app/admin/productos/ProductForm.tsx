@@ -22,13 +22,23 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-export default function ProductForm({ product, rateBcv }: { product?: CatalogProduct; rateBcv: number }) {
+export default function ProductForm({
+  product,
+  rateBcv,
+  brands = [],
+  categories = [],
+}: {
+  product?: CatalogProduct;
+  rateBcv: number;
+  brands?: string[];
+  categories?: string[];
+}) {
   const router = useRouter();
   const [name, setName] = useState(product?.name || "");
   const [slug, setSlug] = useState(product?.slug || "");
   const [sku, setSku] = useState(product?.sku || "");
-  const [brand, setBrand] = useState(product?.brand || "Tamanaco");
-  const [category, setCategory] = useState(product?.category || "Pelotas");
+  const [brand, setBrand] = useState(product?.brand || brands[0] || "");
+  const [category, setCategory] = useState(product?.category || categories[0] || "");
   const [subtitle, setSubtitle] = useState(product?.subtitle || "");
   const [description, setDescription] = useState(product?.description || "");
   const [badge, setBadge] = useState(product?.badge || "");
@@ -152,8 +162,8 @@ export default function ProductForm({ product, rateBcv }: { product?: CatalogPro
           <Field label="Título" value={name} onChange={(value) => { setName(value); if (!product) setSlug(slugify(value)); }} />
           <Field label="Slug" value={slug} onChange={setSlug} />
           <Field label="SKU" value={sku} onChange={setSku} />
-          <Field label="Marca" value={brand} onChange={setBrand} />
-          <Field label="Categoría" value={category} onChange={setCategory} />
+          <SelectField label="Marca" value={brand} onChange={setBrand} options={brands} />
+          <SelectField label="Categoría" value={category} onChange={setCategory} options={categories} />
           <Field label="Subtítulo" value={subtitle} onChange={setSubtitle} />
           <Field label="Etiqueta principal" value={badge} onChange={setBadge} placeholder="Más vendida, Nuevo, Pack..." />
           <Field label="Etiquetas adicionales" value={labels} onChange={setLabels} placeholder="TOP, IMPORTADA, SOFTBALL" />
@@ -270,6 +280,21 @@ function Field({ label, value, onChange, placeholder }: { label: string; value: 
     <div>
       <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.14em] text-neutral-500">{label}</label>
       <input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className="min-h-12 w-full rounded-xl border border-neutral-200 px-4 text-base outline-none focus:border-emerald-500" />
+    </div>
+  );
+}
+
+function SelectField({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: string[] }) {
+  if (options.length === 0) return <Field label={label} value={value} onChange={onChange} />;
+
+  const normalizedOptions = options.includes(value) || !value ? options : [value, ...options];
+  return (
+    <div>
+      <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.14em] text-neutral-500">{label}</label>
+      <select value={value} onChange={(event) => onChange(event.target.value)} className="min-h-12 w-full rounded-xl border border-neutral-200 bg-white px-4 text-base outline-none focus:border-emerald-500">
+        {!value && <option value="">Seleccionar</option>}
+        {normalizedOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+      </select>
     </div>
   );
 }
