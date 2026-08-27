@@ -33,29 +33,6 @@ export default async function Home() {
         <BannerCarousel banners={data.banners} />
       </div>
 
-      <section className="mx-auto max-w-7xl px-4 pt-5 lg:px-8 lg:pt-7">
-        <div className="grid gap-2.5 sm:grid-cols-3">
-          <QuickBenefit
-            eyebrow="Envío"
-            title="Gratis por Zoom y Tealca"
-            text="Despacho nacional coordinado contigo."
-            icon="truck"
-          />
-          <QuickBenefit
-            eyebrow="Precios"
-            title="USD + monto en Bs."
-            text="El monto en Bs. se calcula con la tasa vigente."
-            icon="price"
-          />
-          <QuickBenefit
-            eyebrow="Compra"
-            title="Atención por WhatsApp"
-            text="Confirma producto, cantidad y método de pago."
-            icon="chat"
-          />
-        </div>
-      </section>
-
       <section id="categorias" className="mx-auto max-w-7xl px-4 py-9 lg:px-8 lg:py-12">
         <div className="mb-5 flex items-end justify-between gap-4">
           <div>
@@ -118,6 +95,37 @@ export default async function Home() {
               ¿Necesitas ayuda para elegir? →
             </a>
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-10 lg:px-8 lg:py-14">
+        <div className="mb-7 max-w-2xl">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">La experiencia LCDS</p>
+          <h2 className="mt-1 text-3xl font-black uppercase tracking-[-0.035em] sm:text-4xl">¿Por qué comprar en LCDS?</h2>
+          <p className="mt-2 text-sm font-semibold text-neutral-500 sm:text-base">Compra deportiva clara, acompañada y sin vueltas.</p>
+        </div>
+
+        <div className="grid grid-cols-2 border-l border-t border-neutral-200 md:grid-cols-4">
+          <WhyBuyCard
+            icon="shipping"
+            title="Envío gratis"
+            text="Despachamos por Zoom y Tealca a toda Venezuela sin costo de envío."
+          />
+          <WhyBuyCard
+            icon="support"
+            title="Atención directa"
+            text="Te atendemos por WhatsApp para confirmar producto, pago y despacho."
+          />
+          <WhyBuyCard
+            icon="price"
+            title="Precios claros"
+            text="Ves el precio público en USD y su monto en Bs. con la tasa vigente."
+          />
+          <WhyBuyCard
+            icon="wholesale"
+            title="Detal y mayor"
+            text="Compra una unidad o accede a mejores precios cuando compras por volumen."
+          />
         </div>
       </section>
 
@@ -200,19 +208,45 @@ export default async function Home() {
   );
 }
 
-function QuickBenefit({ eyebrow, title, text, icon }: { eyebrow: string; title: string; text: string; icon: "truck" | "price" | "chat" }) {
+function WhyBuyCard({
+  icon,
+  title,
+  text,
+}: {
+  icon: "shipping" | "support" | "price" | "wholesale";
+  title: string;
+  text: string;
+}) {
   return (
-    <div className="group flex items-center gap-4 rounded-[20px] border border-neutral-200 bg-white p-4 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_35px_rgba(0,0,0,0.06)]">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-950 text-emerald-400 transition group-hover:bg-emerald-500 group-hover:text-neutral-950">
-        {icon === "truck" && <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.8"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>}
-        {icon === "price" && <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.7-.5-1.6-.8-2.7-.8-1.7 0-2.8.8-2.8 2 0 3.1 5.8 1.4 5.8 4.6 0 1.2-1.1 2-2.9 2-1.2 0-2.3-.3-3.2-.9M12 5.8v12.4"/></svg>}
-        {icon === "chat" && <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.8"><path d="M5 5h14v11H9l-4 3z"/><path d="M8 9h8M8 12h5"/></svg>}
+    <div className="group flex min-h-[250px] flex-col items-center justify-center border-b border-r border-neutral-200 bg-neutral-50/70 px-5 py-8 text-center transition duration-300 hover:bg-white sm:min-h-[285px] sm:px-7">
+      <div className="flex h-14 w-14 items-center justify-center text-neutral-400 transition duration-300 group-hover:-translate-y-1 group-hover:text-emerald-600">
+        {icon === "shipping" && (
+          <svg viewBox="0 0 24 24" className="h-10 w-10 fill-none stroke-current" strokeWidth="1.7">
+            <path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z" />
+            <circle cx="7" cy="18" r="2" />
+            <circle cx="18" cy="18" r="2" />
+          </svg>
+        )}
+        {icon === "support" && (
+          <svg viewBox="0 0 24 24" className="h-10 w-10 fill-none stroke-current" strokeWidth="1.7">
+            <path d="M5 5h14v11H9l-4 3z" />
+            <path d="M8 9h8M8 12h5" />
+          </svg>
+        )}
+        {icon === "price" && (
+          <svg viewBox="0 0 24 24" className="h-10 w-10 fill-none stroke-current" strokeWidth="1.7">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M15 8.5c-.7-.5-1.6-.8-2.7-.8-1.7 0-2.8.8-2.8 2 0 3.1 5.8 1.4 5.8 4.6 0 1.2-1.1 2-2.9 2-1.2 0-2.3-.3-3.2-.9M12 5.8v12.4" />
+          </svg>
+        )}
+        {icon === "wholesale" && (
+          <svg viewBox="0 0 24 24" className="h-10 w-10 fill-none stroke-current" strokeWidth="1.7">
+            <path d="M4 7h16v12H4zM7 7V5h10v2M8 11h8M8 15h5" />
+          </svg>
+        )}
       </div>
-      <div>
-        <p className="text-[9px] font-black uppercase tracking-[0.16em] text-emerald-700">{eyebrow}</p>
-        <p className="mt-1 text-sm font-black">{title}</p>
-        <p className="mt-1 text-[11px] leading-5 text-neutral-500">{text}</p>
-      </div>
+      <h3 className="mt-5 max-w-[190px] text-xl font-black leading-[1.05] tracking-[-0.025em] sm:text-2xl">{title}</h3>
+      <p className="mt-4 max-w-[220px] text-sm leading-5 text-neutral-500 sm:text-[15px] sm:leading-6">{text}</p>
     </div>
   );
 }
