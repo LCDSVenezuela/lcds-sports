@@ -102,6 +102,8 @@ export async function ensureCatalogSchema() {
     )
   `;
 
+  await sql`alter table store_settings add column if not exists announcement_messages text not null default ''`;
+
   await sql`
     create table if not exists banners (
       id bigserial primary key,
@@ -165,6 +167,29 @@ export async function ensureCatalogSchema() {
         when announcement_text in ('Envíos a toda Venezuela', 'Envíos a toda Venezuela · Atención directa por WhatsApp')
           then 'Envío GRATIS por Zoom y Tealca · Atención directa por WhatsApp'
         else announcement_text
+      end,
+      announcement_messages = case
+        when trim(coalesce(announcement_messages, '')) = '' then
+          case
+            when announcement_text not in (
+              'Envíos a toda Venezuela',
+              'Envíos a toda Venezuela · Atención directa por WhatsApp',
+              'Envío GRATIS por Zoom y Tealca · Atención directa por WhatsApp'
+            ) then concat_ws(E'\n',
+              announcement_text,
+              'Envío GRATIS por Zoom y Tealca a toda Venezuela',
+              'Precios en USD y Bs. con tasa vigente',
+              'Ventas al mayor para equipos, academias y comercios',
+              'Atención directa por WhatsApp'
+            )
+            else concat_ws(E'\n',
+              'Envío GRATIS por Zoom y Tealca a toda Venezuela',
+              'Precios en USD y Bs. con tasa vigente',
+              'Ventas al mayor para equipos, academias y comercios',
+              'Atención directa por WhatsApp'
+            )
+          end
+        else announcement_messages
       end,
       shipping_text = case
         when shipping_text in ('Envíos a toda Venezuela', 'Envíos a toda Venezuela por MRW, Zoom y Tealca')
