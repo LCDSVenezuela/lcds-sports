@@ -8,6 +8,7 @@ export type TaxonomyItem = {
   slug: string;
   active: boolean;
   sortOrder: number;
+  logoUrl: string | null;
 };
 
 function slugify(value: string) {
@@ -28,12 +29,15 @@ async function ensureTaxonomySchema() {
       id bigserial primary key,
       name text not null unique,
       slug text not null unique,
+      logo_url text,
       active boolean not null default true,
       sort_order integer not null default 0,
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now()
     )
   `;
+
+  await sql`alter table catalog_brands add column if not exists logo_url text`;
 
   await sql`
     create table if not exists catalog_categories (
@@ -71,6 +75,7 @@ function mapRows(rows: Array<Record<string, unknown>>): TaxonomyItem[] {
     slug: String(row.slug),
     active: Boolean(row.active),
     sortOrder: Number(row.sort_order ?? 0),
+    logoUrl: row.logo_url ? String(row.logo_url) : null,
   }));
 }
 
@@ -80,11 +85,11 @@ export async function getTaxonomies(includeInactive = true) {
 
   const [brandRows, categoryRows] = await Promise.all([
     includeInactive
-      ? sql`select id, name, slug, active, sort_order from catalog_brands order by active desc, sort_order asc, name asc`
-      : sql`select id, name, slug, active, sort_order from catalog_brands where active = true order by sort_order asc, name asc`,
+      ? sql`select id, name, slug, logo_url, active, sort_order from catalog_brands order by active desc, sort_order asc, name asc`
+      : sql`select id, name, slug, logo_url, active, sort_order from catalog_brands where active = true order by sort_order asc, name asc`,
     includeInactive
-      ? sql`select id, name, slug, active, sort_order from catalog_categories order by active desc, sort_order asc, name asc`
-      : sql`select id, name, slug, active, sort_order from catalog_categories where active = true order by sort_order asc, name asc`,
+      ? sql`select id, name, slug, null::text as logo_url, active, sort_order from catalog_categories order by active desc, sort_order asc, name asc`
+      : sql`select id, name, slug, null::text as logo_url, active, sort_order from catalog_categories where active = true order by sort_order asc, name asc`,
   ]);
 
   return {
@@ -93,12 +98,16 @@ export async function getTaxonomies(includeInactive = true) {
   };
 }
 
-export async function saveTaxonomyItem(kind: TaxonomyKind, input: { id?: number; name: string; slug?: string; active?: boolean }) {
+export async function saveTaxonomyItem(
+  kind: TaxonomyKind,
+  input: { id?: number; name: string; slug?: string; active?: boolean; logoUrl?: string | null },
+) {
   await ensureTaxonomySchema();
   const sql = db();
   const name = input.name.trim();
   const slug = slugify(input.slug?.trim() || name);
   const active = input.active ?? true;
+  const logoUrl = input.logoUrl?.trim() || null;
 
   if (!name) throw new Error("El nombre es obligatorio");
   if (!slug) throw new Error("No se pudo generar el identificador");
@@ -112,7 +121,7 @@ export async function saveTaxonomyItem(kind: TaxonomyKind, input: { id?: number;
         const oldName = String(current[0].name);
         const rows = await tx`
           update catalog_brands
-          set name = ${name}, slug = ${slug}, active = ${active}, updated_at = now()
+          set name = ${name}, slug = ${slug}, logo_url = ${logoUrl}, active = ${active}, updated_at = now()
           where id = ${id}
           returning id
         `;
@@ -123,8 +132,8 @@ export async function saveTaxonomyItem(kind: TaxonomyKind, input: { id?: number;
       });
     }
     const rows = await sql`
-      insert into catalog_brands (name, slug, active, sort_order)
-      values (${name}, ${slug}, ${active}, coalesce((select max(sort_order) + 1 from catalog_brands), 1))
+      insert into catalog_brands (name, slug, logo_url, active, sort_order)
+      values (${name}, ${slug}, ${logoUrl}, ${active}, coalesce((select max(sort_order) + 1 from catalog_brands), 1))
       returning id
     `;
     return Number(rows[0].id);
