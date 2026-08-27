@@ -46,6 +46,19 @@ export default function MarketingForm({ settings: initialSettings, banners: init
     setBanners((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, ...patch } : item)));
   }
 
+  function updateAnnouncementMessages(value: string) {
+    const messages = value
+      .split(/\r?\n/)
+      .map((item) => item.trimStart())
+      .slice(0, 8);
+
+    setSettings({
+      ...settings,
+      announcementMessages: messages,
+      announcementText: messages.find((item) => item.trim())?.trim() || settings.announcementText,
+    });
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
@@ -65,7 +78,8 @@ export default function MarketingForm({ settings: initialSettings, banners: init
       }
       if (!response.ok) throw new Error(data?.error || "No se pudo guardar la configuración");
       const count = banners.filter((banner) => banner.active && banner.imageUrl.trim()).length;
-      setStatus(`Marketing actualizado. ${count} banner${count === 1 ? "" : "s"} activo${count === 1 ? "" : "s"} en la portada.`);
+      const announcementCount = settings.announcementMessages.filter((message) => message.trim()).length;
+      setStatus(`Marketing actualizado. ${count} banner${count === 1 ? "" : "s"} activo${count === 1 ? "" : "s"} y ${announcementCount} mensaje${announcementCount === 1 ? "" : "s"} rotativo${announcementCount === 1 ? "" : "s"}.`);
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Ocurrió un error");
     } finally {
@@ -77,21 +91,29 @@ export default function MarketingForm({ settings: initialSettings, banners: init
     <form onSubmit={handleSubmit} className="space-y-6">
       <section className="rounded-3xl bg-white p-5 sm:p-7">
         <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Barra superior</p>
-        <h2 className="mt-1 text-2xl font-black">Anuncio y datos de tienda</h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">Controla el mensaje superior, WhatsApp, ubicación, envíos y el texto comercial de mayoristas.</p>
+        <h2 className="mt-1 text-2xl font-black">Mensajes y datos de tienda</h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">La barra superior puede mostrar varias frases en movimiento. Escribe una por línea y cámbialas cuando quieras.</p>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Field label="Texto del anuncio" value={settings.announcementText} onChange={(value) => setSettings({ ...settings, announcementText: value })} />
-          <Field label="Enlace del anuncio (opcional)" value={settings.announcementLink || ""} onChange={(value) => setSettings({ ...settings, announcementLink: value || null })} />
-          <Field label="WhatsApp internacional" value={settings.whatsappPhone} onChange={(value) => setSettings({ ...settings, whatsappPhone: value })} />
-          <Field label="Ubicación" value={settings.locationText} onChange={(value) => setSettings({ ...settings, locationText: value })} />
-          <Field label="Texto de envíos" value={settings.shippingText} onChange={(value) => setSettings({ ...settings, shippingText: value })} />
+          <div className="sm:col-span-2">
+            <TextArea
+              label="Mensajes rotativos · uno por línea"
+              value={settings.announcementMessages.join("\n")}
+              onChange={updateAnnouncementMessages}
+              placeholder={"Envío GRATIS por Zoom y Tealca a toda Venezuela\nPrecios en USD y Bs. con tasa vigente\nVentas al mayor para equipos, academias y comercios\nAtención directa por WhatsApp"}
+            />
+            <p className="mt-2 text-[10px] font-semibold text-neutral-400">Máximo 8 frases. La barra las mostrará en movimiento continuo y repetirá el ciclo automáticamente.</p>
+          </div>
+          <Field label="Enlace de la barra (opcional)" value={settings.announcementLink || ""} onChange={(value) => setSettings({ ...settings, announcementLink: value || null })} />
           <div className="flex items-end">
             <label className="flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-xl border border-neutral-200 px-4 text-sm font-bold">
               <input type="checkbox" checked={settings.announcementEnabled} onChange={(event) => setSettings({ ...settings, announcementEnabled: event.target.checked })} className="h-4 w-4 accent-emerald-500" />
-              Mostrar barra de anuncio
+              Mostrar barra de mensajes
             </label>
           </div>
+          <Field label="WhatsApp internacional" value={settings.whatsappPhone} onChange={(value) => setSettings({ ...settings, whatsappPhone: value })} />
+          <Field label="Ubicación" value={settings.locationText} onChange={(value) => setSettings({ ...settings, locationText: value })} />
+          <Field label="Texto de envíos" value={settings.shippingText} onChange={(value) => setSettings({ ...settings, shippingText: value })} />
         </div>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -167,6 +189,15 @@ function Field({ label, value, onChange, placeholder }: { label: string; value: 
     <div>
       <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.14em] text-neutral-500">{label}</label>
       <input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className="min-h-12 w-full rounded-xl border border-neutral-200 bg-white px-4 text-base outline-none transition focus:border-emerald-500" />
+    </div>
+  );
+}
+
+function TextArea({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string }) {
+  return (
+    <div>
+      <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.14em] text-neutral-500">{label}</label>
+      <textarea value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={5} className="w-full resize-y rounded-xl border border-neutral-200 bg-white px-4 py-3 text-base leading-7 outline-none transition focus:border-emerald-500" />
     </div>
   );
 }
