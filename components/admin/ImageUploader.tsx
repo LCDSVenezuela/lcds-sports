@@ -1,6 +1,6 @@
 "use client";
 
-import { upload } from "@vercel/blob/client";
+import { uploadPresigned } from "@vercel/blob/client";
 import { useRef, useState } from "react";
 
 function cleanName(name: string) {
@@ -58,7 +58,7 @@ export default function ImageUploader({
         .replace(/[^a-z0-9/_-]+/g, "-")
         .replace(/^\/+|\/+$/g, "") || "media";
 
-      const blob = await upload(`${normalizedFolder}/${Date.now()}-${cleanName(file.name)}`, file, {
+      const blob = await uploadPresigned(`${normalizedFolder}/${Date.now()}-${cleanName(file.name)}`, file, {
         access: "public",
         handleUploadUrl: "/api/admin/upload",
         clientPayload: JSON.stringify({ folder: normalizedFolder }),
@@ -69,11 +69,20 @@ export default function ImageUploader({
       setProgress(100);
     } catch (uploadError) {
       const message = uploadError instanceof Error ? uploadError.message : "No se pudo subir la imagen";
-      setError(
-        message.toLowerCase().includes("token") || message.toLowerCase().includes("blob")
-          ? "La subida de imágenes aún no tiene conectado Vercel Blob."
-          : message,
-      );
+      const normalized = message.toLowerCase();
+
+      if (normalized.includes("no autorizado") || normalized.includes("unauthorized")) {
+        setError("Tu sesión administrativa venció. Vuelve a iniciar sesión e intenta otra vez.");
+      } else if (
+        normalized.includes("blob_store_id") ||
+        normalized.includes("blob_webhook_public_key") ||
+        normalized.includes("oidc") ||
+        normalized.includes("read_write_token")
+      ) {
+        setError("El almacenamiento de imágenes de Vercel Blob no está disponible en esta Preview.");
+      } else {
+        setError(message);
+      }
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
