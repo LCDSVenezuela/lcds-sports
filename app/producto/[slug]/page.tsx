@@ -12,238 +12,102 @@ import { calculateBcvBs, formatBs, formatUsd } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProductPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-
   let snapshot = fallbackCatalog;
   let product = fallbackCatalog.products.find((item) => item.slug === slug) ?? null;
-
   try {
     const result = await getProductBySlug(slug);
     snapshot = result;
     product = result.product;
-  } catch {
-    // Mantiene la ficha disponible si la base de datos está temporalmente fuera de línea.
-  }
-
+  } catch {}
   if (!product) notFound();
-
   const bsPrice = calculateBcvBs(product.bcvReferenceUsd, snapshot.rateBcv);
   const related = snapshot.products.filter((item) => item.id !== product.id).slice(0, 4);
+  const paymentNames = snapshot.paymentMethods.map((method) => method.name).join(" · ");
 
   return (
     <main className="min-h-screen bg-white text-neutral-950">
       <StoreHeader settings={snapshot.settings} />
-
-      <div className="mx-auto max-w-7xl px-4 pb-12 pt-5 lg:px-8 lg:pb-16">
-        <nav className="mb-5 flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-400">
-          <Link href="/" className="transition hover:text-neutral-950">Inicio</Link>
-          <span>/</span>
-          <Link href="/#productos" className="transition hover:text-neutral-950">{product.category}</Link>
-          <span>/</span>
-          <span className="max-w-[220px] truncate text-neutral-600">{product.name}</span>
+      <div className="mx-auto max-w-[1440px] px-4 pb-14 pt-4 lg:px-8 lg:pb-20 lg:pt-6">
+        <nav className="mb-5 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-neutral-400">
+          <Link href="/" className="transition hover:text-neutral-950">Inicio</Link><span>/</span>
+          <Link href="/#productos" className="transition hover:text-neutral-950">{product.category}</Link><span>/</span>
+          <span className="max-w-[240px] truncate text-neutral-600">{product.name}</span>
         </nav>
 
-        <section className="grid gap-7 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.92fr)] lg:gap-12">
-          <ProductGallery images={product.images} fallbackImage={product.image} productName={product.name} />
-
-          <div className="lg:pt-2">
-            <div className="flex flex-wrap gap-2">
-              {product.badge && (
-                <span className="rounded-full bg-neutral-950 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.14em] text-white">{product.badge}</span>
-              )}
-              {product.labels.map((label) => (
-                <span key={label} className="rounded-full bg-emerald-50 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.14em] text-emerald-700">{label}</span>
-              ))}
-            </div>
-
-            <p className="mt-5 text-xs font-black uppercase tracking-[0.18em] text-neutral-400">{product.brand}</p>
-            <h1 className="mt-2 text-3xl font-black leading-[1.02] tracking-[-0.035em] sm:text-4xl lg:text-[42px]">{product.name}</h1>
-            {product.subtitle && <p className="mt-3 text-sm leading-6 text-neutral-500 sm:text-base">{product.subtitle}</p>}
-
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <section className="grid gap-8 lg:grid-cols-[minmax(0,1.12fr)_minmax(390px,0.88fr)] lg:gap-14 xl:gap-16">
+          <div className="lg:sticky lg:top-[104px] lg:self-start">
+            <ProductGallery images={product.images} fallbackImage={product.image} productName={product.name} />
+          </div>
+          <aside className="min-w-0 lg:pt-1">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <RatingStars rating={product.rating} count={product.reviewCount} />
-              {product.sku && <span className="text-xs font-semibold text-neutral-400">SKU {product.sku}</span>}
+              <span className="text-[10px] font-black uppercase tracking-[0.18em] text-neutral-400">{product.brand}</span>
             </div>
-
-            <div className="mt-7 overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-[0_18px_45px_rgba(0,0,0,0.045)]">
-              <div className="p-5 sm:p-6">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-neutral-400">Precio en USD</p>
-                <p className="mt-1 text-4xl font-black tracking-[-0.04em] sm:text-5xl">{formatUsd(product.priceUsd)}</p>
-              </div>
-              <div className="border-t border-neutral-100 bg-neutral-50 px-5 py-4 sm:px-6">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[9px] font-black uppercase tracking-[0.14em] text-neutral-400">Precio en Bs.</p>
-                    <p className="mt-1 text-xl font-black text-neutral-800">{formatBs(bsPrice)}</p>
-                  </div>
-                  <span className="rounded-full bg-white px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.12em] text-neutral-500 shadow-sm">Tasa vigente</span>
-                </div>
-                <p className="mt-3 max-w-lg text-[11px] leading-5 text-neutral-500">
-                  El monto en Bs. se calcula automáticamente con la referencia interna configurada para este producto y la tasa vigente de LCDS Sports.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <InfoPill label="Disponibilidad" value={product.stock > 0 ? `${product.stock} disponibles` : "Agotado"} positive={product.stock > 0} />
-              <InfoPill label="Envío" value={product.freeShipping ? "Gratis por Zoom y Tealca" : "Consultar condiciones"} positive={product.freeShipping} />
-            </div>
-
-            {product.freeShipping && (
-              <div className="mt-4 flex items-center gap-4 rounded-[20px] bg-emerald-500 p-4 text-neutral-950">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-neutral-950 text-emerald-400">
-                  <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="1.8"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
-                </div>
-                <div>
-                  <p className="text-sm font-black">Envío gratis nacional</p>
-                  <p className="mt-1 text-xs leading-5 text-emerald-950/75">Puedes elegir Zoom o Tealca al preparar el pedido.</p>
-                </div>
+            <h1 className="mt-4 text-[34px] font-black leading-[0.98] tracking-[-0.045em] sm:text-[42px] lg:text-[48px]">{product.name}</h1>
+            {product.subtitle && <p className="mt-4 text-sm font-medium leading-6 text-neutral-500 sm:text-base">{product.subtitle}</p>}
+            {(product.badge || product.labels.length > 0) && (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {product.badge && <span className="rounded-full bg-neutral-950 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.14em] text-white">{product.badge}</span>}
+                {product.labels.map((label) => <span key={label} className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.14em] text-neutral-600">{label}</span>)}
               </div>
             )}
-
-            <div className="mt-6 border-t border-neutral-200 pt-6">
-              <WhatsAppOrderButton
-                productName={product.name}
-                sku={product.sku}
-                priceUsd={product.priceUsd}
-                bcvReferenceUsd={product.bcvReferenceUsd}
-                rateBcv={snapshot.rateBcv}
-                phone={snapshot.settings.whatsappPhone}
-                paymentMethods={snapshot.paymentMethods}
-                stock={product.stock}
-                wholesaleEnabled={product.wholesaleEnabled}
-                wholesaleTiers={product.wholesaleTiers}
-                freeShipping={product.freeShipping}
-              />
-            </div>
-
-            <div className="mt-6 rounded-[22px] border border-neutral-200 p-4 sm:p-5">
-              <div className="flex items-end justify-between gap-4">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">Métodos de pago</p>
-                  <p className="mt-1 text-sm font-black">Disponibles al confirmar tu pedido</p>
-                </div>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {snapshot.paymentMethods.map((method) => (
-                  <span key={method.id} className="inline-flex min-h-9 items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 text-[11px] font-black text-neutral-700">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                    {method.name}
-                  </span>
-                ))}
+            <div className="mt-7 border-y border-neutral-200 py-5">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div><p className="text-[10px] font-black uppercase tracking-[0.16em] text-neutral-400">Precio</p><p className="mt-1 text-4xl font-black tracking-[-0.045em] sm:text-[44px]">{formatUsd(product.priceUsd)}</p></div>
+                <div className="text-right"><p className="text-[10px] font-black uppercase tracking-[0.16em] text-neutral-400">En bolívares</p><p className="mt-1 text-xl font-black text-neutral-800">{formatBs(bsPrice)}</p><p className="mt-1 text-[10px] font-semibold text-neutral-400">Tasa vigente</p></div>
               </div>
             </div>
-          </div>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 pb-4">
+              <div className="flex items-center gap-2"><span className={`h-2.5 w-2.5 rounded-full ${product.stock > 0 ? "bg-emerald-500" : "bg-neutral-300"}`} /><span className="text-sm font-black">{product.stock > 0 ? "Disponible" : "Agotado"}</span>{product.stock > 0 && <span className="text-xs font-semibold text-neutral-400">· {product.stock} unidades</span>}</div>
+              {product.sku && <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-neutral-400">SKU {product.sku}</span>}
+            </div>
+            <div className="mt-6">
+              <WhatsAppOrderButton productName={product.name} sku={product.sku} priceUsd={product.priceUsd} bcvReferenceUsd={product.bcvReferenceUsd} rateBcv={snapshot.rateBcv} phone={snapshot.settings.whatsappPhone} paymentMethods={snapshot.paymentMethods} stock={product.stock} wholesaleEnabled={product.wholesaleEnabled} wholesaleTiers={product.wholesaleTiers} freeShipping={product.freeShipping} />
+            </div>
+            <div className="mt-7 divide-y divide-neutral-200 border-y border-neutral-200">
+              <details className="group py-4" open><summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-black"><span>Envío</span><span className="text-lg font-light text-neutral-400 transition group-open:rotate-45">+</span></summary><p className="mt-3 pr-8 text-sm leading-6 text-neutral-500">{product.freeShipping ? "Envío gratis por Zoom o Tealca a toda Venezuela." : snapshot.settings.shippingText}</p></details>
+              <details className="group py-4"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-black"><span>Métodos de pago</span><span className="text-lg font-light text-neutral-400 transition group-open:rotate-45">+</span></summary><p className="mt-3 pr-8 text-sm leading-6 text-neutral-500">{paymentNames || "Consulta los métodos disponibles por WhatsApp."}</p></details>
+              <details className="group py-4"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-black"><span>Garantía, cambios y reembolsos</span><span className="text-lg font-light text-neutral-400 transition group-open:rotate-45">+</span></summary><div className="mt-3 pr-8 text-sm leading-6 text-neutral-500"><p>Garantía indicada para este producto: {product.warrantyDays} día(s).</p><div className="mt-2 flex flex-wrap gap-3 text-xs font-black"><Link href="/politicas" className="text-neutral-950 underline decoration-neutral-300 underline-offset-4">Políticas</Link><Link href="/reembolsos" className="text-neutral-950 underline decoration-neutral-300 underline-offset-4">Cambios y reembolsos</Link></div></div></details>
+            </div>
+          </aside>
         </section>
 
-        <section className="mt-12 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-          <div className="rounded-[28px] border border-neutral-200 p-6 sm:p-8">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Información del producto</p>
-            <h2 className="mt-2 text-2xl font-black">Descripción y detalles</h2>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-neutral-600 sm:text-base">{product.description || product.subtitle || "Consulta con nuestro equipo para más información."}</p>
+        <section className="mt-14 grid border-l border-t border-neutral-200 sm:grid-cols-2 lg:mt-20 lg:grid-cols-4">
+          <ProductMeta label="Marca" value={product.brand} /><ProductMeta label="Categoría" value={product.category} /><ProductMeta label="Condición" value="Nuevo" /><ProductMeta label="Garantía" value={`${product.warrantyDays} día(s)`} />
+        </section>
 
-            <div className="mt-7 grid gap-3 sm:grid-cols-2">
-              <DetailRow label="Marca" value={product.brand} />
-              <DetailRow label="Categoría" value={product.category} />
-              <DetailRow label="Condición" value="Nuevo" />
-              <DetailRow label="Garantía" value={`${product.warrantyDays} día(s) de garantía`} />
-            </div>
-          </div>
+        <section className="grid gap-8 border-b border-neutral-200 py-14 lg:grid-cols-[0.72fr_1.28fr] lg:gap-16 lg:py-20">
+          <div><p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Producto</p><h2 className="mt-2 text-3xl font-black tracking-[-0.035em] sm:text-4xl">Descripción</h2></div>
+          <div><p className="max-w-3xl text-base leading-8 text-neutral-600 sm:text-lg">{product.description || product.subtitle || "Consulta con nuestro equipo para más información sobre este producto."}</p>{product.labels.length > 0 && <div className="mt-7 flex flex-wrap gap-2">{product.labels.map((label) => <span key={label} className="rounded-full bg-neutral-100 px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-neutral-600">{label}</span>)}</div>}</div>
+        </section>
 
-          <div className="rounded-[28px] bg-neutral-950 p-6 text-white sm:p-8">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400">Compra tranquila</p>
-            <h2 className="mt-2 text-2xl font-black">Todo claro antes de pagar</h2>
-            <div className="mt-6 space-y-4">
-              <ConfidenceItem title="Stock visible" text={product.stock > 0 ? "Producto disponible para coordinar pedido." : "Actualmente agotado."} />
-              <ConfidenceItem title="Precio definido" text="Ves el precio en USD y el monto calculado en Bs. antes de escribirnos." />
-              <ConfidenceItem title="Despacho coordinado" text={product.freeShipping ? "Envío gratis por Zoom y Tealca." : snapshot.settings.shippingText} />
-            </div>
+        <section className="py-14 lg:py-20">
+          <div className="mb-7"><p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Compra y entrega</p><h2 className="mt-2 text-3xl font-black tracking-[-0.035em] sm:text-4xl">Todo lo importante, en un solo lugar.</h2></div>
+          <div className="grid gap-3 md:grid-cols-3">
+            <PurchaseCard title="Envío nacional" text={product.freeShipping ? "Zoom o Tealca gratis a toda Venezuela." : snapshot.settings.shippingText} />
+            <PurchaseCard title="Pago flexible" text={paymentNames || "Métodos disponibles al confirmar tu pedido."} />
+            <PurchaseCard title="Atención directa" text="Tu pedido se confirma por WhatsApp antes del despacho." />
           </div>
         </section>
 
         {product.wholesaleEnabled && (
-          <section id="mayor" className="mt-6 overflow-hidden rounded-[28px] bg-emerald-500 p-6 sm:p-8 lg:p-10">
-            <div className="grid gap-7 lg:grid-cols-[1fr_1fr] lg:items-center">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-950/70">Ventas al mayor</p>
-                <h2 className="mt-2 max-w-xl text-3xl font-black leading-[1.02] tracking-tight text-neutral-950">{snapshot.settings.wholesaleTitle}</h2>
-                <p className="mt-3 max-w-xl text-sm leading-6 text-emerald-950/80">{product.wholesaleNote || snapshot.settings.wholesaleText}</p>
-                <Link href="/mayoristas" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-xl bg-neutral-950 px-4 text-xs font-black text-white transition hover:-translate-y-0.5">
-                  VER PÁGINA MAYORISTA
-                </Link>
-              </div>
-
-              <div className="space-y-2">
-                {product.wholesaleTiers.length ? (
-                  product.wholesaleTiers.map((tier) => (
-                    <div key={tier.id} className="flex items-center justify-between gap-4 rounded-2xl bg-white/85 px-4 py-4 backdrop-blur-sm">
-                      <div>
-                        <p className="text-sm font-black">{tier.label || `Desde ${tier.minQuantity} unidades`}</p>
-                        <p className="mt-1 text-xs text-neutral-500">{formatBs(calculateBcvBs(tier.bcvReferenceUsd, snapshot.rateBcv))} en Bs.</p>
-                      </div>
-                      <p className="text-xl font-black">{formatUsd(tier.priceUsd)}</p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="rounded-2xl bg-white/85 p-5 text-sm font-semibold text-neutral-700">Consulta por WhatsApp para recibir precio especial según cantidad.</div>
-                )}
-              </div>
+          <section id="mayor" className="overflow-hidden rounded-[30px] bg-neutral-950 p-6 text-white sm:p-8 lg:p-10">
+            <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+              <div><p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400">Precio por volumen</p><h2 className="mt-2 max-w-xl text-3xl font-black leading-[1.02] tracking-[-0.035em] sm:text-4xl">Compra más, paga mejor.</h2><p className="mt-4 max-w-xl text-sm leading-6 text-neutral-400">{product.wholesaleNote || snapshot.settings.wholesaleText}</p><Link href="/mayoristas" className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full border border-white/15 px-5 text-xs font-black transition hover:bg-white hover:text-neutral-950">VER VENTAS AL MAYOR</Link></div>
+              <div className="space-y-2">{product.wholesaleTiers.length ? product.wholesaleTiers.map((tier) => <div key={tier.id} className="flex items-center justify-between gap-5 rounded-2xl bg-white px-4 py-4 text-neutral-950 sm:px-5"><div><p className="text-sm font-black">{tier.label || `Desde ${tier.minQuantity} unidades`}</p><p className="mt-1 text-xs font-semibold text-neutral-500">{formatBs(calculateBcvBs(tier.bcvReferenceUsd, snapshot.rateBcv))} c/u en Bs.</p></div><p className="text-2xl font-black tracking-[-0.03em]">{formatUsd(tier.priceUsd)}</p></div>) : <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-5 text-sm font-semibold text-neutral-300">Consulta por WhatsApp el precio según cantidad.</div>}</div>
             </div>
           </section>
         )}
 
-        {related.length > 0 && (
-          <section className="mt-12">
-            <div className="mb-5 flex items-end justify-between gap-4">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">También te puede interesar</p>
-                <h2 className="mt-1 text-2xl font-black">Productos relacionados</h2>
-              </div>
-              <Link href="/#productos" className="text-xs font-black text-neutral-500">Ver catálogo →</Link>
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-              {related.map((item) => <ProductCard key={item.id} product={item} rateBcv={snapshot.rateBcv} />)}
-            </div>
-          </section>
-        )}
+        {related.length > 0 && <section className="mt-14 lg:mt-20"><div className="mb-6 flex items-end justify-between gap-4"><div><p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">También te puede interesar</p><h2 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">Productos relacionados</h2></div><Link href="/#productos" className="text-xs font-black text-neutral-500 transition hover:text-neutral-950">Ver catálogo →</Link></div><div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">{related.map((item) => <ProductCard key={item.id} product={item} rateBcv={snapshot.rateBcv} />)}</div></section>}
       </div>
-
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white/95 p-3 backdrop-blur-xl lg:hidden"><a href="#comprar" className="flex min-h-12 items-center justify-between rounded-full bg-neutral-950 px-5 text-white"><span className="text-sm font-black">Pedir producto</span><span className="text-sm font-black text-emerald-400">{formatUsd(product.priceUsd)} →</span></a></div>
       <StoreFooter settings={snapshot.settings} paymentMethods={snapshot.paymentMethods} />
     </main>
   );
 }
 
-function InfoPill({ label, value, positive }: { label: string; value: string; positive?: boolean }) {
-  return (
-    <div className="rounded-[20px] border border-neutral-200 p-4">
-      <p className="text-[9px] font-black uppercase tracking-[0.14em] text-neutral-400">{label}</p>
-      <p className={`mt-1 text-sm font-black ${positive ? "text-emerald-700" : "text-neutral-800"}`}>{value}</p>
-    </div>
-  );
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4 rounded-xl bg-neutral-50 px-4 py-3">
-      <span className="text-xs font-semibold text-neutral-400">{label}</span>
-      <span className="text-right text-sm font-black text-neutral-800">{value}</span>
-    </div>
-  );
-}
-
-function ConfidenceItem({ title, text }: { title: string; text: string }) {
-  return (
-    <div className="border-b border-white/10 pb-4 last:border-b-0 last:pb-0">
-      <div className="flex items-center gap-2">
-        <span className="h-2 w-2 rounded-full bg-emerald-400" />
-        <p className="text-sm font-black">{title}</p>
-      </div>
-      <p className="mt-2 pl-4 text-xs leading-5 text-neutral-400">{text}</p>
-    </div>
-  );
-}
+function ProductMeta({ label, value }: { label: string; value: string }) { return <div className="border-b border-r border-neutral-200 bg-white px-5 py-6 sm:px-6 lg:py-7"><p className="text-[9px] font-black uppercase tracking-[0.16em] text-neutral-400">{label}</p><p className="mt-2 text-base font-black text-neutral-950">{value}</p></div>; }
+function PurchaseCard({ title, text }: { title: string; text: string }) { return <article className="rounded-[24px] border border-neutral-200 bg-neutral-50 p-5 sm:p-6"><div className="h-2 w-8 rounded-full bg-emerald-400" /><h3 className="mt-5 text-lg font-black tracking-tight">{title}</h3><p className="mt-2 text-sm leading-6 text-neutral-500">{text}</p></article>; }
