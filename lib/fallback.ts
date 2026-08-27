@@ -17,6 +17,10 @@ export const fallbackCatalog: CatalogSnapshot = {
     shippingText: "Envío gratis por Zoom y Tealca a toda Venezuela",
     wholesaleTitle: "Precios especiales para equipos, academias y comercios",
     wholesaleText: "Consulta condiciones por cantidad y recibe atención personalizada.",
+    businessHours: "",
+    instagramUrl: null,
+    tiktokUrl: null,
+    facebookUrl: null,
   },
   banners: [
     {
