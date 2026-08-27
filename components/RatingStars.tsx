@@ -7,6 +7,8 @@ export default function RatingStars({
   count?: number;
   compact?: boolean;
 }) {
+  if (typeof count === "number" && count <= 0) return null;
+
   const rounded = Math.round(Math.max(0, Math.min(5, rating)));
 
   return (
@@ -25,9 +27,7 @@ export default function RatingStars({
         ))}
       </div>
       {!compact && <span className="text-xs font-bold text-neutral-700">{rating.toFixed(1)}</span>}
-      {typeof count === "number" && (
-        <span className="text-xs text-neutral-400">({count})</span>
-      )}
+      {typeof count === "number" && <span className="text-xs text-neutral-400">({count})</span>}
     </div>
   );
 }
