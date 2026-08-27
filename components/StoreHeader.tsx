@@ -10,23 +10,19 @@ const nav = [
   { label: "Catálogo", href: "/#productos" },
   { label: "Softball", href: "/#categorias" },
   { label: "Mayoristas", href: "/mayoristas" },
-  { label: "Envío gratis", href: "/#envios" },
+  { label: "Envíos", href: "/#envios" },
 ];
 
-export default function StoreHeader({
-  settings,
-}: {
-  settings: StoreSettings;
-}) {
+export default function StoreHeader({ settings }: { settings: StoreSettings }) {
   const [open, setOpen] = useState(false);
   const whatsappHref = `https://wa.me/${settings.whatsappPhone}`;
 
   return (
     <>
       {settings.announcementEnabled && (
-        <div className="relative z-50 overflow-hidden bg-neutral-950 px-4 py-2.5 text-center text-[10px] font-bold uppercase tracking-[0.15em] text-white sm:text-[11px]">
-          <div className="mx-auto flex max-w-7xl items-center justify-center gap-2">
-            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.8)]" />
+        <div className="relative z-50 border-b border-white/5 bg-neutral-950 px-4 py-2.5 text-white">
+          <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 text-center text-[9px] font-black uppercase tracking-[0.18em] sm:text-[10px]">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.8)]" />
             {settings.announcementLink ? (
               <Link href={settings.announcementLink} className="transition hover:text-emerald-400">
                 {settings.announcementText}
@@ -38,40 +34,42 @@ export default function StoreHeader({
         </div>
       )}
 
-      <header className="sticky top-0 z-40 border-b border-neutral-200/80 bg-white/88 backdrop-blur-xl">
-        <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-4 px-4 lg:px-8">
-          <Link href="/" className="relative h-11 w-[122px] shrink-0 sm:w-[142px]" aria-label="LCDS Sports">
+      <header className="sticky top-0 z-40 border-b border-neutral-200/70 bg-white/94 backdrop-blur-2xl">
+        <div className="mx-auto flex h-[68px] max-w-7xl items-center gap-3 px-4 lg:h-[76px] lg:px-8">
+          <Link href="/" className="relative h-10 w-[112px] shrink-0 sm:h-11 sm:w-[132px]" aria-label="LCDS Sports">
             <Image
               src="/brand/lcds-logo.png"
               alt="LCDS Sports"
               fill
               priority
-              sizes="142px"
+              sizes="132px"
               className="object-contain object-left"
             />
           </Link>
 
-          <nav className="hidden flex-1 items-center justify-center gap-7 lg:flex">
+          <div className="hidden h-7 w-px bg-neutral-200 lg:block" />
+
+          <nav className="hidden items-center gap-1 lg:flex">
             {nav.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
-                className="relative py-2 text-sm font-bold text-neutral-700 transition hover:text-neutral-950 after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-emerald-500 after:transition-all hover:after:w-full"
+                className="rounded-full px-3.5 py-2 text-[12px] font-extrabold text-neutral-600 transition duration-200 hover:bg-neutral-100 hover:text-neutral-950"
               >
                 {item.label}
               </Link>
             ))}
           </nav>
 
-          <div className="ml-auto hidden min-w-[250px] max-w-sm flex-1 items-center rounded-full border border-neutral-200 bg-neutral-50/90 px-4 transition focus-within:border-emerald-400 focus-within:bg-white lg:flex">
-            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-neutral-500" strokeWidth="2">
+          <div className="ml-auto hidden w-full max-w-[260px] items-center rounded-full border border-neutral-200 bg-neutral-50 px-3.5 transition focus-within:border-neutral-300 focus-within:bg-white xl:flex">
+            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-neutral-400" strokeWidth="2">
               <circle cx="11" cy="11" r="7" />
               <path d="m20 20-3.5-3.5" />
             </svg>
             <input
               type="search"
-              placeholder="Buscar en LCDS..."
-              className="h-11 min-w-0 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-neutral-400"
+              placeholder="Buscar productos"
+              className="h-10 min-w-0 flex-1 bg-transparent px-2.5 text-xs font-semibold outline-none placeholder:font-medium placeholder:text-neutral-400"
             />
           </div>
 
@@ -79,8 +77,9 @@ export default function StoreHeader({
             href={whatsappHref}
             target="_blank"
             rel="noreferrer"
-            className="hidden min-h-11 items-center justify-center rounded-full bg-emerald-500 px-4 text-xs font-black text-neutral-950 transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-400 sm:flex"
+            className="hidden min-h-10 items-center justify-center gap-2 rounded-full bg-neutral-950 px-4 text-[11px] font-black text-white transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-500 hover:text-neutral-950 sm:flex"
           >
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
             Comprar
           </a>
 
@@ -88,7 +87,7 @@ export default function StoreHeader({
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Abrir menú"
-            className="ml-auto flex h-11 w-11 items-center justify-center rounded-full border border-neutral-200 bg-white transition hover:border-neutral-300 lg:hidden"
+            className="ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-950 transition hover:bg-neutral-100 lg:hidden"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="2">
               <path d="M4 7h16M4 12h16M4 17h16" />
@@ -105,66 +104,68 @@ export default function StoreHeader({
           type="button"
           aria-label="Cerrar menú"
           onClick={() => setOpen(false)}
-          className={`absolute inset-0 bg-black/50 backdrop-blur-[2px] transition-opacity ${open ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 bg-black/55 backdrop-blur-sm transition-opacity duration-300 ${open ? "opacity-100" : "opacity-0"}`}
         />
+
         <aside
-          className={`absolute right-0 top-0 h-full w-[88%] max-w-sm overflow-y-auto bg-white p-5 shadow-2xl transition-transform duration-300 ${
-            open ? "translate-x-0" : "translate-x-full"
-          }`}
+          className={`absolute right-0 top-0 flex h-full w-[90%] max-w-[390px] flex-col overflow-y-auto bg-white p-5 shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}
         >
-          <div className="flex items-center justify-between">
-            <div className="relative h-12 w-32">
+          <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+            <div className="relative h-11 w-32">
               <Image src="/brand/lcds-logo.png" alt="LCDS Sports" fill sizes="128px" className="object-contain object-left" />
             </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-neutral-100"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100"
               aria-label="Cerrar menú"
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current" strokeWidth="2">
+              <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current" strokeWidth="2">
                 <path d="M6 6l12 12M18 6 6 18" />
               </svg>
             </button>
           </div>
 
-          <div className="mt-7 flex items-center rounded-2xl border border-neutral-200 bg-neutral-50 px-4 focus-within:border-emerald-400">
+          <div className="mt-5 flex items-center rounded-2xl border border-neutral-200 bg-neutral-50 px-4 focus-within:border-emerald-400">
             <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-neutral-500" strokeWidth="2">
               <circle cx="11" cy="11" r="7" />
               <path d="m20 20-3.5-3.5" />
             </svg>
-            <input type="search" placeholder="Buscar en LCDS..." className="h-12 min-w-0 flex-1 bg-transparent px-3 text-base outline-none" />
+            <input type="search" placeholder="Buscar productos" className="h-12 min-w-0 flex-1 bg-transparent px-3 text-sm font-semibold outline-none" />
           </div>
 
-          <nav className="mt-6 divide-y divide-neutral-100">
-            {nav.map((item) => (
+          <nav className="mt-5 divide-y divide-neutral-100 border-y border-neutral-100">
+            {nav.map((item, index) => (
               <Link
                 key={item.label}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="flex min-h-14 items-center justify-between text-base font-black"
+                className="flex min-h-14 items-center justify-between text-[15px] font-black text-neutral-900"
               >
-                {item.label}
-                <span aria-hidden="true" className="text-emerald-600">→</span>
+                <span className="flex items-center gap-3">
+                  <span className="text-[9px] font-black tracking-[0.16em] text-neutral-300">0{index + 1}</span>
+                  {item.label}
+                </span>
+                <span aria-hidden="true" className="text-emerald-600">↗</span>
               </Link>
             ))}
           </nav>
 
-          <div className="mt-7 rounded-[24px] bg-neutral-950 p-5 text-white">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-emerald-400">Atención directa</p>
+          <div className="mt-auto pt-7">
+            <div className="overflow-hidden rounded-[26px] bg-neutral-950 p-5 text-white">
+              <p className="text-[9px] font-black uppercase tracking-[0.18em] text-emerald-400">LCDS Sports</p>
+              <p className="mt-2 text-lg font-black leading-tight">Compra fácil. Recibe en toda Venezuela.</p>
+              <p className="mt-3 text-xs leading-5 text-neutral-400">{settings.shippingText}</p>
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 flex min-h-12 items-center justify-center rounded-xl bg-emerald-500 text-sm font-black text-neutral-950"
+              >
+                Comprar por WhatsApp
+              </a>
             </div>
-            <p className="mt-3 text-sm leading-6 text-neutral-300">{settings.locationText}</p>
-            <p className="mt-1 text-xs leading-5 text-neutral-500">{settings.shippingText}</p>
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-5 flex min-h-12 items-center justify-center rounded-xl bg-emerald-500 text-sm font-black text-neutral-950"
-            >
-              Comprar por WhatsApp
-            </a>
+            <p className="mt-4 text-center text-[10px] font-semibold text-neutral-400">{settings.locationText}</p>
           </div>
         </aside>
       </div>
