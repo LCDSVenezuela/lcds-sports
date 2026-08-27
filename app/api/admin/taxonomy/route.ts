@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
         name: String(body.name || ""),
         slug: body.slug ? String(body.slug) : undefined,
         active: body.active === undefined ? true : Boolean(body.active),
+        logoUrl: body.kind === "brand" && body.logoUrl ? String(body.logoUrl) : null,
       });
       return NextResponse.json({ ok: true, id });
     }
