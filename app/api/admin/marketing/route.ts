@@ -36,6 +36,10 @@ export async function POST(request: NextRequest) {
       shippingText: String(settings.shippingText || "Envío gratis por Zoom y Tealca a toda Venezuela"),
       wholesaleTitle: String(settings.wholesaleTitle || "Ventas al mayor"),
       wholesaleText: String(settings.wholesaleText || "Consulta condiciones por cantidad."),
+      businessHours: String(settings.businessHours || ""),
+      instagramUrl: settings.instagramUrl ? String(settings.instagramUrl) : null,
+      tiktokUrl: settings.tiktokUrl ? String(settings.tiktokUrl) : null,
+      facebookUrl: settings.facebookUrl ? String(settings.facebookUrl) : null,
     });
 
     await saveBanners(
