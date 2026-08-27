@@ -103,6 +103,10 @@ export async function ensureCatalogSchema() {
   `;
 
   await sql`alter table store_settings add column if not exists announcement_messages text not null default ''`;
+  await sql`alter table store_settings add column if not exists business_hours text not null default ''`;
+  await sql`alter table store_settings add column if not exists instagram_url text`;
+  await sql`alter table store_settings add column if not exists tiktok_url text`;
+  await sql`alter table store_settings add column if not exists facebook_url text`;
 
   await sql`
     create table if not exists banners (
