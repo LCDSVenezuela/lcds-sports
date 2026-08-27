@@ -354,3 +354,29 @@ export async function saveBanners(
     }
   });
 }
+
+export async function savePaymentMethods(
+  methods: Array<{ name: string; detail?: string | null }>,
+) {
+  await ensureCatalogSchema();
+  const sql = db();
+  const normalized = methods
+    .map((method) => ({
+      name: method.name.trim(),
+      detail: method.detail?.trim() || null,
+    }))
+    .filter((method) => method.name)
+    .slice(0, 10);
+
+  await sql.begin(async (tx) => {
+    await tx`delete from payment_methods`;
+
+    for (let index = 0; index < normalized.length; index += 1) {
+      const method = normalized[index];
+      await tx`
+        insert into payment_methods (name, detail, active, sort_order)
+        values (${method.name}, ${method.detail}, true, ${index + 1})
+      `;
+    }
+  });
+}
