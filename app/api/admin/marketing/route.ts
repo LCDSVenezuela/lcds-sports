@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   const settings = body?.settings;
   const banners = Array.isArray(body?.banners) ? body.banners : [];
 
-  if (!settings || typeof settings.announcementText !== "string" || typeof settings.whatsappPhone !== "string") {
+  if (!settings || typeof settings.whatsappPhone !== "string") {
     return NextResponse.json({ ok: false, error: "Configuración inválida" }, { status: 400 });
   }
 
@@ -21,10 +21,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "Solo se permiten 3 banners" }, { status: 400 });
   }
 
+  const announcementMessages = Array.isArray(settings.announcementMessages)
+    ? settings.announcementMessages.map((message: unknown) => String(message))
+    : [String(settings.announcementText || "")];
+
   try {
     await updateStoreSettings({
       announcementEnabled: Boolean(settings.announcementEnabled),
-      announcementText: String(settings.announcementText),
+      announcementText: String(settings.announcementText || announcementMessages[0] || ""),
+      announcementMessages,
       announcementLink: settings.announcementLink ? String(settings.announcementLink) : null,
       whatsappPhone: String(settings.whatsappPhone),
       locationText: String(settings.locationText || "Portuguesa, Venezuela"),
@@ -47,13 +52,12 @@ export async function POST(request: NextRequest) {
       })),
     );
 
-    // Leemos nuevamente desde la base para confirmar cuántos banners activos
-    // quedaron realmente disponibles para la portada.
     const snapshot = await getCatalogSnapshot();
 
     return NextResponse.json({
       ok: true,
       bannerCount: snapshot.banners.length,
+      announcementCount: snapshot.settings.announcementMessages.length,
     });
   } catch (error) {
     console.error("No se pudo actualizar marketing", error);
