@@ -50,7 +50,7 @@ export default function BrandCarousel() {
           <div
             key={copyIndex}
             aria-hidden={copyIndex === 1}
-            className="brand-marquee-group flex min-w-screen shrink-0 items-center justify-around gap-10 px-7 sm:gap-14 sm:px-10 lg:gap-20 lg:px-14"
+            className="brand-marquee-group flex min-w-[min(100vw,80rem)] shrink-0 items-center justify-around gap-10 px-7 sm:gap-14 sm:px-10 lg:gap-20 lg:px-14"
           >
             {brands.map((brand) => (
               <div key={`${copyIndex}-${brand.id}`} className="flex min-w-[120px] items-center justify-center sm:min-w-[150px] lg:min-w-[170px]">
