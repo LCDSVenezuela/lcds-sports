@@ -62,6 +62,7 @@ export type PaymentMethod = {
 export type StoreSettings = {
   announcementEnabled: boolean;
   announcementText: string;
+  announcementMessages: string[];
   announcementLink: string | null;
   whatsappPhone: string;
   locationText: string;
@@ -83,6 +84,16 @@ function splitLabels(value: unknown) {
     .split("|")
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function splitAnnouncementMessages(value: unknown, fallback: string) {
+  const messages = String(value ?? "")
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+
+  return messages.length ? messages : [fallback];
 }
 
 function mapProduct(
@@ -160,7 +171,7 @@ async function loadStoreData() {
         limit 3
       `,
       sql`
-        select announcement_enabled, announcement_text, announcement_link,
+        select announcement_enabled, announcement_text, announcement_messages, announcement_link,
           whatsapp_phone, location_text, shipping_text,
           wholesale_title, wholesale_text
         from store_settings
@@ -213,10 +224,12 @@ async function loadStoreData() {
 
   const rateE4 = rateRows[0]?.rate_e4 ? Number(rateRows[0].rate_e4) : 2500000;
   const settingsRow = settingsRows[0];
+  const announcementText = String(settingsRow?.announcement_text ?? "Envíos a toda Venezuela");
 
   const settings: StoreSettings = {
     announcementEnabled: Boolean(settingsRow?.announcement_enabled ?? true),
-    announcementText: String(settingsRow?.announcement_text ?? "Envíos a toda Venezuela"),
+    announcementText,
+    announcementMessages: splitAnnouncementMessages(settingsRow?.announcement_messages, announcementText),
     announcementLink: settingsRow?.announcement_link ? String(settingsRow.announcement_link) : null,
     whatsappPhone: String(settingsRow?.whatsapp_phone ?? "584225329551"),
     locationText: String(settingsRow?.location_text ?? "Portuguesa, Venezuela"),
@@ -286,6 +299,7 @@ export async function updateBcvRate(rate: number) {
 export async function updateStoreSettings(input: {
   announcementEnabled: boolean;
   announcementText: string;
+  announcementMessages: string[];
   announcementLink?: string | null;
   whatsappPhone: string;
   locationText: string;
@@ -295,12 +309,18 @@ export async function updateStoreSettings(input: {
 }) {
   await ensureCatalogSchema();
   const sql = db();
+  const messages = input.announcementMessages
+    .map((message) => message.replace(/\r?\n/g, " ").trim())
+    .filter(Boolean)
+    .slice(0, 8);
+  const firstMessage = messages[0] || input.announcementText.trim() || "Envíos a toda Venezuela";
 
   await sql`
     update store_settings
     set
       announcement_enabled = ${input.announcementEnabled},
-      announcement_text = ${input.announcementText.trim()},
+      announcement_text = ${firstMessage},
+      announcement_messages = ${messages.join("\n")},
       announcement_link = ${input.announcementLink?.trim() || null},
       whatsapp_phone = ${input.whatsappPhone.trim()},
       location_text = ${input.locationText.trim()},
