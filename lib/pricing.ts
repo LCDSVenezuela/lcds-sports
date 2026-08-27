@@ -1,7 +1,5 @@
-export const BCV_RATE = 250;
-
-export function calculateBcvBs(referenceUsd: number) {
-  return referenceUsd * BCV_RATE;
+export function calculateBcvBs(referenceUsd: number, rateBcv: number) {
+  return referenceUsd * rateBcv;
 }
 
 export function formatUsd(value: number) {
