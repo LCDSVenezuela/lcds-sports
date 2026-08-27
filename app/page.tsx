@@ -114,9 +114,9 @@ export default async function Home() {
             text="Te atendemos por WhatsApp para confirmar producto, pago y despacho."
           />
           <WhyBuyCard
-            icon="price"
-            title="Precios claros"
-            text="Ves el precio público en USD y su monto en Bs. con la tasa vigente."
+            icon="payment"
+            title="Pago flexible"
+            text="Elige entre los métodos de pago disponibles al momento de confirmar tu pedido."
           />
           <WhyBuyCard
             icon="wholesale"
@@ -193,7 +193,7 @@ function WhyBuyCard({
   title,
   text,
 }: {
-  icon: "shipping" | "support" | "price" | "wholesale";
+  icon: "shipping" | "support" | "payment" | "wholesale";
   title: string;
   text: string;
 }) {
@@ -213,10 +213,10 @@ function WhyBuyCard({
             <path d="M8 9h8M8 12h5" />
           </svg>
         )}
-        {icon === "price" && (
+        {icon === "payment" && (
           <svg viewBox="0 0 24 24" className="h-10 w-10 fill-none stroke-current" strokeWidth="1.7">
-            <circle cx="12" cy="12" r="9" />
-            <path d="M15 8.5c-.7-.5-1.6-.8-2.7-.8-1.7 0-2.8.8-2.8 2 0 3.1 5.8 1.4 5.8 4.6 0 1.2-1.1 2-2.9 2-1.2 0-2.3-.3-3.2-.9M12 5.8v12.4" />
+            <rect x="3" y="6" width="18" height="12" rx="2" />
+            <path d="M3 10h18M7 15h4" />
           </svg>
         )}
         {icon === "wholesale" && (
