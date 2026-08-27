@@ -18,6 +18,9 @@ export async function POST(request: Request) {
     const jsonResponse = await handleUploadPresigned({
       body,
       request,
+      ...(process.env.BLOB_WEBHOOK_PUBLIC_KEY
+        ? { webhookPublicKey: process.env.BLOB_WEBHOOK_PUBLIC_KEY }
+        : {}),
       getSignedToken: async (pathname, clientPayload) => {
         const session = await getAdminSession();
         if (!session) throw new Error("No autorizado");
@@ -33,11 +36,10 @@ export async function POST(request: Request) {
         }
 
         const readWriteToken = process.env.BLOB_READ_WRITE_TOKEN;
-        const oidcToken = process.env.VERCEL_OIDC_TOKEN;
         const storeId = process.env.BLOB_STORE_ID;
 
-        if (!readWriteToken && !(oidcToken && storeId)) {
-          throw new Error("Falta la conexión de Vercel Blob para este entorno");
+        if (!storeId && !readWriteToken) {
+          throw new Error("BLOB_STORE_ID no está disponible en este entorno");
         }
 
         const token = await issueSignedToken({
@@ -45,9 +47,8 @@ export async function POST(request: Request) {
           operations: ["put"],
           allowedContentTypes,
           maximumSizeInBytes,
-          ...(readWriteToken
-            ? { token: readWriteToken }
-            : { oidcToken: oidcToken as string, storeId: storeId as string }),
+          ...(readWriteToken ? { token: readWriteToken } : {}),
+          ...(storeId ? { storeId } : {}),
         });
 
         return {
@@ -68,6 +69,7 @@ export async function POST(request: Request) {
     return NextResponse.json(jsonResponse);
   } catch (error) {
     const message = error instanceof Error ? error.message : "No se pudo subir la imagen";
+    console.error("LCDS Blob upload error:", message);
     return NextResponse.json({ error: message }, { status: message === "No autorizado" ? 401 : 400 });
   }
 }
