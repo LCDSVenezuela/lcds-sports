@@ -31,6 +31,7 @@ export default async function AdminPage() {
             <p className="mt-1 text-xs text-neutral-400">Sesión: {session.email}</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Link href="/admin/ventas" className="flex min-h-11 items-center rounded-xl bg-emerald-500 px-4 text-xs font-black text-neutral-950">VENTAS</Link>
             <Link href="/admin/productos" className="flex min-h-11 items-center rounded-xl border border-white/15 px-4 text-xs font-black transition hover:bg-white/10">PRODUCTOS</Link>
             <Link href="/admin/catalogo" className="flex min-h-11 items-center rounded-xl border border-white/15 px-4 text-xs font-black transition hover:bg-white/10">MARCAS / CATEGORÍAS</Link>
             <Link href="/" className="flex min-h-11 items-center rounded-xl bg-emerald-500 px-4 text-xs font-black text-neutral-950">VER TIENDA</Link>
@@ -49,6 +50,13 @@ export default async function AdminPage() {
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
           <div className="space-y-6">
+            <Link href="/admin/ventas" className="group block rounded-3xl bg-neutral-950 p-6 text-white transition hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(0,0,0,0.16)] sm:p-7">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400">Ventas</p>
+              <h2 className="mt-2 text-2xl font-black">Cotizaciones y notas de entrega</h2>
+              <p className="mt-2 text-sm leading-6 text-neutral-400">Selecciona productos, moneda, método y cliente. Calcula USD y Bs con la tasa vigente y genera el PDF.</p>
+              <span className="mt-5 inline-block text-sm font-black text-emerald-400 transition group-hover:translate-x-1">Abrir panel de ventas →</span>
+            </Link>
+
             <section className="rounded-3xl bg-white p-5 sm:p-7">
               <p className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700">Configuración comercial</p>
               <h2 className="mt-1 text-2xl font-black">Tasa BCV</h2>
