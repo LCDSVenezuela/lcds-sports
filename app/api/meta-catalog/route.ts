@@ -30,13 +30,21 @@ export async function GET() {
       "price",
       "link",
       "image_link",
+      "additional_image_link",
       "brand",
     ];
 
     const rows = snapshot.products
       .map((product) => {
-        const image = product.images[0]?.imageUrl || product.image;
-        if (!image) return null;
+        const images = Array.from(
+          new Set(
+            [product.image, ...product.images.map((item) => item.imageUrl)]
+              .filter((value): value is string => Boolean(value))
+              .map(absoluteUrl),
+          ),
+        ).slice(0, 20);
+        const [primaryImage, ...additionalImages] = images;
+        if (!primaryImage) return null;
 
         const description =
           product.description?.trim() ||
@@ -51,7 +59,8 @@ export async function GET() {
           "new",
           `${product.priceUsd.toFixed(2)} USD`,
           `${SITE_URL}/producto/${encodeURIComponent(product.slug)}`,
-          absoluteUrl(image),
+          primaryImage,
+          additionalImages.join("|"),
           product.brand,
         ].map(csvCell);
       })
