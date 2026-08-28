@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
+import DeleteProductButton from "@/components/admin/DeleteProductButton";
 import { requireAdminPage } from "@/lib/admin-auth";
 import { getTaxonomies } from "@/lib/admin-taxonomy";
 import { getCatalogSnapshot } from "@/lib/catalog";
@@ -47,6 +48,17 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
       </header>
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         <ProductForm product={product} rateBcv={snapshot.rateBcv} brands={brands} categories={categories} />
+
+        <section className="mt-6 rounded-3xl border border-red-200 bg-white p-5 sm:p-7">
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-red-600">Zona de eliminación</p>
+          <h2 className="mt-1 text-xl font-black">Eliminar este producto</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-500">
+            El producto desaparecerá del catálogo. Sus imágenes y precios por cantidad asociados también serán eliminados.
+          </p>
+          <div className="mt-5">
+            <DeleteProductButton productId={product.id} productName={product.name} />
+          </div>
+        </section>
       </div>
     </main>
   );
