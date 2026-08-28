@@ -41,14 +41,14 @@ export default async function Home() {
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Explora LCDS</p>
             <h2 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">Encuentra lo que necesitas</h2>
           </div>
-          <Link href="#productos" className="hidden text-xs font-black text-neutral-500 transition hover:text-neutral-950 sm:block">Ver catálogo →</Link>
+          <Link href="/catalogo" className="hidden text-xs font-black text-neutral-500 transition hover:text-neutral-950 sm:block">Ver catálogo →</Link>
         </div>
 
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
           {categories.map((category) => (
             <Link
               key={category.name}
-              href="#productos"
+              href={`/catalogo?categoria=${encodeURIComponent(category.name)}`}
               className="group relative min-h-36 overflow-hidden rounded-[22px] border border-neutral-200 bg-neutral-50 p-4 transition duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:bg-white hover:shadow-[0_18px_45px_rgba(0,0,0,0.07)]"
             >
               <span className="absolute right-3 top-1 text-[44px] font-black tracking-[-0.08em] text-neutral-100 transition duration-300 group-hover:-translate-y-1 group-hover:text-emerald-50">{category.code}</span>
