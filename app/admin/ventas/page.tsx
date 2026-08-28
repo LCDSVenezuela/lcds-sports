@@ -3,7 +3,7 @@ import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 import { requireAdminPage } from "@/lib/admin-auth";
 import { getCatalogSnapshot } from "@/lib/catalog";
 import { fallbackCatalog } from "@/lib/fallback";
-import { getRecentSalesDocuments } from "@/lib/sales";
+import { getRecentSalesDocuments, type SalesDocumentSummary } from "@/lib/sales";
 import SalesPanel from "./SalesPanel";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function SalesPage() {
   const session = await requireAdminPage();
   let snapshot = fallbackCatalog;
-  let documents = [];
+  let documents: SalesDocumentSummary[] = [];
 
   try {
     [snapshot, documents] = await Promise.all([
