@@ -7,7 +7,7 @@ import type { StoreSettings } from "@/lib/catalog";
 
 const nav = [
   { label: "Inicio", href: "/" },
-  { label: "Catálogo", href: "/#productos" },
+  { label: "Catálogo", href: "/catalogo" },
   { label: "Softball", href: "/#categorias" },
   { label: "Mayoristas", href: "/mayoristas" },
   { label: "Envíos", href: "/#envios" },
@@ -107,17 +107,20 @@ export default function StoreHeader({ settings }: { settings: StoreSettings }) {
             ))}
           </nav>
 
-          <div className="ml-auto hidden w-full max-w-[260px] items-center rounded-full border border-neutral-200 bg-neutral-50 px-3.5 transition focus-within:border-neutral-300 focus-within:bg-white xl:flex">
-            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-neutral-400" strokeWidth="2">
+          <form action="/catalogo" method="get" role="search" className="ml-auto hidden w-full max-w-[260px] items-center rounded-full border border-neutral-200 bg-neutral-50 px-3.5 transition focus-within:border-neutral-300 focus-within:bg-white xl:flex">
+            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-neutral-400" strokeWidth="2" aria-hidden="true">
               <circle cx="11" cy="11" r="7" />
               <path d="m20 20-3.5-3.5" />
             </svg>
+            <label htmlFor="desktop-product-search" className="sr-only">Buscar productos</label>
             <input
+              id="desktop-product-search"
+              name="q"
               type="search"
               placeholder="Buscar productos"
               className="h-10 min-w-0 flex-1 bg-transparent px-2.5 text-xs font-semibold outline-none placeholder:font-medium placeholder:text-neutral-400"
             />
-          </div>
+          </form>
 
           <a
             href={whatsappHref}
@@ -172,13 +175,14 @@ export default function StoreHeader({ settings }: { settings: StoreSettings }) {
             </button>
           </div>
 
-          <div className="mt-5 flex items-center rounded-2xl border border-neutral-200 bg-neutral-50 px-4 focus-within:border-emerald-400">
-            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-neutral-500" strokeWidth="2">
+          <form action="/catalogo" method="get" role="search" onSubmit={() => setOpen(false)} className="mt-5 flex items-center rounded-2xl border border-neutral-200 bg-neutral-50 px-4 focus-within:border-emerald-400">
+            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-neutral-500" strokeWidth="2" aria-hidden="true">
               <circle cx="11" cy="11" r="7" />
               <path d="m20 20-3.5-3.5" />
             </svg>
-            <input type="search" placeholder="Buscar productos" className="h-12 min-w-0 flex-1 bg-transparent px-3 text-sm font-semibold outline-none" />
-          </div>
+            <label htmlFor="mobile-product-search" className="sr-only">Buscar productos</label>
+            <input id="mobile-product-search" name="q" type="search" placeholder="Buscar productos" className="h-12 min-w-0 flex-1 bg-transparent px-3 text-sm font-semibold outline-none" />
+          </form>
 
           <nav className="mt-5 divide-y divide-neutral-100 border-y border-neutral-100">
             {nav.map((item, index) => (
