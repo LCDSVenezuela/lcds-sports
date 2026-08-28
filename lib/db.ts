@@ -159,6 +159,48 @@ export async function ensureCatalogSchema() {
   await sql`create index if not exists admin_sessions_expires_at_idx on admin_sessions(expires_at)`;
 
   await sql`
+    create table if not exists sales_documents (
+      id bigserial primary key,
+      document_number text unique,
+      document_type text not null check (document_type in ('quote', 'delivery')),
+      issued_date date not null,
+      valid_until date not null,
+      customer_name text not null,
+      customer_tax_id text,
+      customer_phone text,
+      customer_address text,
+      seller_name text not null,
+      payment_method text not null,
+      currency text not null check (currency in ('USD', 'BS')),
+      exchange_rate_e4 integer not null,
+      notes text,
+      subtotal_usd_cents integer not null,
+      subtotal_bs_cents bigint not null,
+      created_by bigint references admin_users(id) on delete set null,
+      created_at timestamptz not null default now()
+    )
+  `;
+
+  await sql`
+    create table if not exists sales_document_items (
+      id bigserial primary key,
+      document_id bigint not null references sales_documents(id) on delete cascade,
+      product_id bigint references products(id) on delete set null,
+      product_name text not null,
+      sku text,
+      quantity integer not null check (quantity > 0),
+      unit_price_usd_cents integer not null,
+      unit_price_bs_cents bigint not null,
+      line_total_usd_cents integer not null,
+      line_total_bs_cents bigint not null,
+      sort_order integer not null default 0
+    )
+  `;
+
+  await sql`create index if not exists sales_documents_created_at_idx on sales_documents(created_at desc)`;
+  await sql`create index if not exists sales_document_items_document_id_idx on sales_document_items(document_id)`;
+
+  await sql`
     insert into store_settings (id)
     values (1)
     on conflict (id) do nothing
