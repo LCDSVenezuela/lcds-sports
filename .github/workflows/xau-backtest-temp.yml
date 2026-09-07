@@ -19,12 +19,16 @@ jobs:
           python-version: '3.11'
       - name: Install dependencies
         run: python -m pip install --upgrade pip pandas numpy
+      - name: Enforce strict pivot causality
+        run: |
+          sed -i 's/shift(2)\.ffill()/shift(3).ffill()/g' .tmp_xau_backtest/xau_backtest.py
+          sed -i 's/available only 2 bars after pivot/usable only after the second right-hand bar has fully closed/g' .tmp_xau_backtest/xau_backtest.py
       - name: Run six-year XAUUSD backtest
         run: python .tmp_xau_backtest/xau_backtest.py
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: xau-backtest-results
+          name: xau-backtest-results-v2
           path: xau_bt_results/
           if-no-files-found: warn
