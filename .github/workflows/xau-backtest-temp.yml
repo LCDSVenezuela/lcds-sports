@@ -1,0 +1,30 @@
+name: Temporary XAUUSD Backtest
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.tmp_xau_backtest/**'
+      - '.github/workflows/xau-backtest-temp.yml'
+  workflow_dispatch:
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pandas numpy
+      - name: Run six-year XAUUSD backtest
+        run: python .tmp_xau_backtest/xau_backtest.py
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xau-backtest-results
+          path: xau_bt_results/
+          if-no-files-found: warn
