@@ -1,0 +1,30 @@
+name: Temporary XAUUSD Backtest V3 No Trend
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.tmp_xau_backtest_v3/**'
+      - '.github/workflows/xau-backtest-v3-temp.yml'
+  workflow_dispatch:
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pandas numpy
+      - name: Run no-trend XAUUSD backtest
+        run: python .tmp_xau_backtest_v3/xau_backtest_v3.py
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xau-backtest-v3-results
+          path: xau_bt_results_v3/
+          if-no-files-found: warn
